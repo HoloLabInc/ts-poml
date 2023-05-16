@@ -80,6 +80,7 @@ export type PomlElement =
   | PomlGeometryElement
   | PomlCesium3dTilesElement
   | PomlScreenSpaceElement
+  | PomlUnknownElement
 
 export class PomlEmptyElement extends PomlElementBase {
   type: 'element' = 'element'
@@ -221,6 +222,14 @@ export class PomlScreenSpaceElement extends PomlElementBase {
   type: 'screen-space' = 'screen-space'
 
   constructor(init?: Partial<PomlScreenSpaceElement>) {
+    super(init ?? {})
+  }
+}
+
+export class PomlUnknownElement extends PomlElementBase {
+  type: '?' = '?'
+
+  constructor(init?: Partial<PomlEmptyElement>) {
     super(init ?? {})
   }
 }

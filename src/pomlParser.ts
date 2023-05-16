@@ -23,6 +23,7 @@ import {
   ArDisplay,
   ScriptElement,
   PomlScreenSpaceElement,
+  PomlUnknownElement,
 } from '.'
 import {
   FxElement,
@@ -700,12 +701,38 @@ export class PomlParser {
       })
     }
 
-    const childElements = this.parseChildren(fxElement.element ?? [])
+    if ('element' in fxElement) {
+      const childElements = this.parseChildren(fxElement.element ?? [])
 
-    return new PomlEmptyElement({
-      ...commonElement,
-      ...childElements,
-    })
+      return new PomlEmptyElement({
+        ...commonElement,
+        ...childElements,
+      })
+    }
+
+    {
+      // unkown elements
+      // For example, tagname is 'foo' if the element is `<foo></foo>`
+
+      const tagname: string | undefined = Object.keys(fxElement)[0]
+      if (tagname !== undefined) {
+        const array: any = (fxElement as any)[tagname]
+        if (array instanceof Array) {
+          const childElements = this.parseChildren(array as FxElement[])
+          console.log(childElements)
+          return new PomlUnknownElement({
+            ...commonElement,
+            ...childElements,
+          })
+        } else {
+          return new PomlUnknownElement({
+            ...commonElement,
+          })
+        }
+      }
+    }
+
+    throw new Error('invalid xml')
   }
 
   private fxGeometryToGeometry(

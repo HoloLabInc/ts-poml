@@ -660,7 +660,7 @@ describe('parse', () => {
     expect(poml.scene.children?.length).toBe(2)
   })
 
-  test('unsupported element tag is treated as element', () => {
+  test('unsupported element tag is treated as unknown element', () => {
     const xml = `
     <poml>
       <scene>
@@ -673,7 +673,7 @@ describe('parse', () => {
     const poml = parse(xml)
     expect(poml.scene.children?.length).toBe(3)
     expect(poml.scene.children?.[0].type).toBe('text')
-    expect(poml.scene.children?.[1].type).toBe('element')
+    expect(poml.scene.children?.[1].type).toBe('?')
     expect(poml.scene.children?.[2].type).toBe('model')
   })
 
