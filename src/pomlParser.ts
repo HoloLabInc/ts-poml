@@ -293,6 +293,7 @@ export class PomlParser {
     const options = {
       ignoreAttributes: false,
       preserveOrder: true,
+      commentPropName: '#comment',
     }
 
     const parser = new XMLParser(options)
@@ -328,6 +329,7 @@ export class PomlParser {
       ignoreAttributes: false,
       preserveOrder: true,
       format: true,
+      commentPropName: '#comment',
     }
 
     const builder = new XMLBuilder(options)
