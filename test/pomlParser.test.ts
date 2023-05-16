@@ -59,8 +59,11 @@ describe('parse', () => {
     expect(poml.scene.children?.length).toBe(1)
 
     const element = poml.scene.children?.[0]
-    expect(element?.type).toBe('element')
-    expect(element?.id).toBe('a')
+    expect(element.type).toBe('element')
+    if (element.type != 'element') {
+      fail()
+    }
+    expect(element.id).toBe('a')
   })
 
   test('parse two elements', () => {
@@ -75,8 +78,15 @@ describe('parse', () => {
 
     const poml = parse(xml)
     expect(poml.scene.children?.length).toBe(2)
-    expect(poml.scene.children?.[0]?.id).toBe('a')
-    expect(poml.scene.children?.[1]?.id).toBe('b')
+
+    const element0 = poml.scene.children?.[0]
+    const element1 = poml.scene.children?.[1]
+    if (element0?.type != 'element' || element1?.type != 'element') {
+      fail()
+    }
+
+    expect(element0?.id).toBe('a')
+    expect(element1?.id).toBe('b')
   })
 
   test('parse element and model', () => {
@@ -93,9 +103,20 @@ describe('parse', () => {
     const poml = parse(xml)
     expect(poml.scene.children?.length).toBe(3)
 
-    expect(poml.scene.children?.[0]?.id).toBe('a')
-    expect(poml.scene.children?.[1]?.id).toBe(undefined)
-    expect(poml.scene.children?.[2]?.id).toBe('b')
+    const element0 = poml.scene.children?.[0]
+    const element1 = poml.scene.children?.[1]
+    const element2 = poml.scene.children?.[2]
+    if (
+      element0?.type != 'element' ||
+      element1?.type != 'model' ||
+      element2?.type != 'element'
+    ) {
+      fail()
+    }
+
+    expect(element0.id).toBe('a')
+    expect(element1.id).toBe(undefined)
+    expect(element2.id).toBe('b')
 
     const modelElement = poml.scene.children?.[1]
     expect(modelElement?.type).toBe('model')
@@ -362,6 +383,9 @@ describe('parse', () => {
     const element = poml.scene.children?.[0]
     expect(element?.type).toBe('element')
 
+    if (!('scriptElements' in element)) {
+      fail()
+    }
     expect(element.scriptElements?.length).toBe(1)
     const script = element.scriptElements?.[0]
     expect(script?.type).toBe('script')
@@ -410,6 +434,9 @@ describe('parse', () => {
     const screenSpaceElement = poml.scene.children?.[0]
     expect(screenSpaceElement?.type).toBe('screen-space')
 
+    if (!('children' in screenSpaceElement)) {
+      fail()
+    }
     expect(screenSpaceElement.children?.length).toBe(1)
   })
 
@@ -430,17 +457,26 @@ describe('parse', () => {
     expect(poml.scene.children?.length).toBe(5)
 
     const elements = poml.scene.children ?? []
+    if (
+      elements[0].type != 'element' ||
+      elements[1].type != 'element' ||
+      elements[2].type != 'element' ||
+      elements[3].type != 'element' ||
+      elements[4].type != 'element'
+    ) {
+      fail()
+    }
 
     expect(elements[0].position).toStrictEqual({ x: 1, y: 2, z: 3 })
     expect(elements[1].position).toStrictEqual({ x: 1, y: 2, z: 3 })
     expect(elements[2].position).toStrictEqual({ x: 1, y: 2, z: 3 })
 
-    expect(elements[0].scale).toStrictEqual(1)
-    expect(elements[1].scale).toStrictEqual({ x: 4, y: 5, z: 6 })
+    expect(elements[0]['scale']).toStrictEqual(1)
+    expect(elements[1]['scale']).toStrictEqual({ x: 4, y: 5, z: 6 })
 
-    expect(elements[0].arDisplay).toBeUndefined()
-    expect(elements[3].arDisplay).toBe('none')
-    expect(elements[4].arDisplay).toBe('occlusion')
+    expect(elements[0]['arDisplay']).toBeUndefined()
+    expect(elements[3]['arDisplay']).toBe('none')
+    expect(elements[4]['arDisplay']).toBe('occlusion')
   })
 
   test('parse id attribute', () => {
@@ -459,6 +495,15 @@ describe('parse', () => {
     expect(poml.scene.children?.length).toBe(5)
 
     const elements = poml.scene.children ?? []
+    if (
+      elements[0].type != 'element' ||
+      elements[1].type != 'element' ||
+      elements[2].type != 'element' ||
+      elements[3].type != 'element' ||
+      elements[4].type != 'element'
+    ) {
+      fail()
+    }
     expect(elements[0].id).toBe('aaa')
     expect(elements[1].id).toBe('null')
     expect(elements[2].id).toBe('undefined')
@@ -485,6 +530,10 @@ describe('parse', () => {
     )
 
     expect(poml.scene.children?.length).toBe(1)
+
+    if (!('customAttributes' in poml.scene.children?.[0])) {
+      fail()
+    }
     const elementCustomAttributes = poml.scene.children[0].customAttributes
     expect(elementCustomAttributes).toStrictEqual(
       new Map([
@@ -511,6 +560,9 @@ describe('parse', () => {
     const poml = parse(xml)
     const elements = poml.scene.children
     expect(elements?.length).toBe(1)
+    if (!('children' in elements?.[0])) {
+      fail()
+    }
     expect(elements?.[0].children?.length).toBe(2)
   })
 
@@ -530,6 +582,9 @@ describe('parse', () => {
     expect(poml.scene.children?.length).toBe(1)
 
     const element = poml.scene.children?.[0]
+    if (!('coordinateReferences' in element)) {
+      fail()
+    }
     const references = element?.coordinateReferences
     expect(references?.length).toBe(1)
 
@@ -560,6 +615,9 @@ describe('parse', () => {
     expect(poml.scene.children?.length).toBe(1)
 
     const element = poml.scene.children?.[0]
+    if (!('coordinateReferences' in element)) {
+      fail()
+    }
     const references = element?.coordinateReferences
     expect(references?.length).toBe(1)
 
@@ -588,6 +646,9 @@ describe('parse', () => {
     const poml = parse(xml)
 
     const element = poml.scene.children?.[0]
+    if (!('coordinateReferences' in element)) {
+      fail()
+    }
     const references = element?.coordinateReferences
     expect(references?.length).toBe(1)
 
@@ -616,6 +677,9 @@ describe('parse', () => {
     const poml = parse(xml)
 
     const element = poml.scene.children?.[0]
+    if (!('coordinateReferences' in element)) {
+      fail()
+    }
     const references = element?.coordinateReferences
     expect(references?.length).toBe(1)
 
@@ -671,6 +735,7 @@ describe('parse', () => {
     </poml>
     `
     const poml = parse(xml)
+    // console.log(poml.scene.children)
     expect(poml.scene.children?.length).toBe(3)
     expect(poml.scene.children?.[0].type).toBe('text')
     expect(poml.scene.children?.[1].type).toBe('?')
@@ -719,6 +784,19 @@ describe('parse', () => {
       </scene>
     </poml>
     `)
+    if (
+      poml.scene.children[0].type != 'element' ||
+      poml.scene.children[1].type != 'element' ||
+      poml.scene.children[2].type != 'element' ||
+      poml.scene.children[3].type != 'element' ||
+      poml.scene.children[4].type != 'element' ||
+      poml.scene.children[5].type != 'element' ||
+      poml.scene.children[6].type != 'element' ||
+      poml.scene.children[7].type != 'element' ||
+      poml.scene.children[8].type != 'element'
+    ) {
+      fail()
+    }
     expect(poml.scene.children[0].display).toBe('none')
     expect(poml.scene.children[1].display).toBe('visible')
     expect(poml.scene.children[2].display).toBe('occlusion')
@@ -762,9 +840,33 @@ describe('parse', () => {
     expect(poml.scene.customAttributes.size).toBe(0)
 
     const element = poml.scene.children[0]
-    expect(element.customAttributes.size).toBe(0)
+    if ('customAttributes' in element) {
+      expect(element.customAttributes.size).toBe(0)
+    } else {
+      fail()
+    }
 
-    expect(element.children[0].customAttributes.size).toBe(0)
+    if ('customAttributes' in element.children[0]) {
+      expect(element.children[0].customAttributes.size).toBe(0)
+    } else {
+      fail()
+    }
+  })
+
+  test('comments test', () => {
+    const poml = parse(`
+    <poml>
+      <scene>
+        <element/>
+        <!-- comment -->
+        <element/>
+      </scene>
+    </poml>
+    `)
+    expect(poml.scene.children.length).toBe(3)
+    expect(poml.scene.children[0].type).toBe('element')
+    expect(poml.scene.children[1].type).toBe('?')
+    expect(poml.scene.children[2].type).toBe('element')
   })
 
   // build and parse tests

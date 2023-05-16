@@ -445,7 +445,9 @@ export class PomlParser {
   private filterPomlElements = (
     childElements: (PomlElement | CoordinateReference | ScriptElement)[]
   ): PomlElement[] => {
-    return childElements.filter((x): x is PomlElement => 'children' in x)
+    return childElements.filter(
+      (x): x is PomlElement => 'children' in x || x.type == '?'
+    )
   }
 
   private filterCoordinateReferences = (
@@ -712,29 +714,9 @@ export class PomlParser {
       })
     }
 
-    {
-      // unkown elements
-      // For example, tagname is 'foo' if the element is `<foo></foo>`
-
-      const tagname: string | undefined = Object.keys(fxElement)[0]
-      if (tagname !== undefined) {
-        const array: any = (fxElement as any)[tagname]
-        if (array instanceof Array) {
-          const childElements = this.parseChildren(array as FxElement[])
-          console.log(childElements)
-          return new PomlUnknownElement({
-            ...commonElement,
-            ...childElements,
-          })
-        } else {
-          return new PomlUnknownElement({
-            ...commonElement,
-          })
-        }
-      }
-    }
-
-    throw new Error('invalid xml')
+    // console.log('unknown element')
+    // console.log(Object.keys(fxElement)[0])
+    return new PomlUnknownElement(fxElement)
   }
 
   private fxGeometryToGeometry(
@@ -881,6 +863,9 @@ export class PomlParser {
     pomlElement: PomlElement,
     options?: BuildOptions
   ): FxElement {
+    if (pomlElement.type == '?') {
+      return pomlElement._original
+    }
     // common attributes
     let commonAttributes: FxElementAttributesBase = {}
 

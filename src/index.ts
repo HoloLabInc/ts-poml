@@ -1,3 +1,5 @@
+import { FxUnknownElement } from './fastXmlParserPomlType'
+
 export class Poml {
   scene: Scene
   meta?: Meta
@@ -226,10 +228,20 @@ export class PomlScreenSpaceElement extends PomlElementBase {
   }
 }
 
-export class PomlUnknownElement extends PomlElementBase {
+export class PomlUnknownElement {
   type: '?' = '?'
+  _original: FxUnknownElement
 
-  constructor(init?: Partial<PomlEmptyElement>) {
-    super(init ?? {})
+  constructor(original: FxUnknownElement) {
+    this._original = original
   }
 }
+
+// export class PomlCommentElement {
+//   type: '#comment' = '#comment'
+//   text: string
+
+//   constructor(text: string) {
+//     this.text = text ?? ''
+//   }
+// }
