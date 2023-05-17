@@ -875,7 +875,7 @@ export class PomlParser {
     pomlElement: MaybePomlElement,
     options?: BuildOptions
   ): FxElement {
-    if (pomlElement.type == '?') {
+    if (pomlElement.type === '?') {
       return pomlElement._original
     }
     // common attributes
