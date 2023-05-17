@@ -37,7 +37,7 @@ export type Rotation = { x: number; y: number; z: number; w: number }
 export type ScaleByDistance = boolean | number
 
 export abstract class PomlElementBase {
-  children: PomlElement[] = []
+  children: (PomlElement | PomlUnknownElement)[] = []
   coordinateReferences: CoordinateReference[] = []
   scriptElements: ScriptElement[] = []
 
@@ -82,7 +82,6 @@ export type PomlElement =
   | PomlGeometryElement
   | PomlCesium3dTilesElement
   | PomlScreenSpaceElement
-  | PomlUnknownElement
 
 export class PomlEmptyElement extends PomlElementBase {
   type: 'element' = 'element'

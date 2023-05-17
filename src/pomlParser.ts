@@ -443,15 +443,26 @@ export class PomlParser {
   }
 
   private filterPomlElements = (
-    childElements: (PomlElement | CoordinateReference | ScriptElement)[]
-  ): PomlElement[] => {
+    childElements: (
+      | PomlElement
+      | CoordinateReference
+      | ScriptElement
+      | PomlUnknownElement
+    )[]
+  ): (PomlElement | PomlUnknownElement)[] => {
     return childElements.filter(
-      (x): x is PomlElement => 'children' in x || x.type == '?'
+      (x): x is PomlElement | PomlUnknownElement =>
+        'children' in x || x.type == '?'
     )
   }
 
   private filterCoordinateReferences = (
-    childElements: (PomlElement | CoordinateReference | ScriptElement)[]
+    childElements: (
+      | PomlElement
+      | CoordinateReference
+      | ScriptElement
+      | PomlUnknownElement
+    )[]
   ): CoordinateReference[] => {
     return childElements.filter(
       (x): x is CoordinateReference => !('children' in x) && !('src' in x)
@@ -459,7 +470,12 @@ export class PomlParser {
   }
 
   private filterScriptElements = (
-    childElements: (PomlElement | CoordinateReference | ScriptElement)[]
+    childElements: (
+      | PomlElement
+      | CoordinateReference
+      | ScriptElement
+      | PomlUnknownElement
+    )[]
   ): ScriptElement[] => {
     return childElements.filter(
       (x): x is ScriptElement => !('children' in x) && 'src' in x
@@ -468,7 +484,7 @@ export class PomlParser {
 
   private fxElementToPomlElement(
     fxElement: FxElement
-  ): PomlElement | CoordinateReference | ScriptElement {
+  ): PomlElement | CoordinateReference | ScriptElement | PomlUnknownElement {
     const commonAttr = fxElement[':@'] ?? {}
 
     // read common attributes
@@ -797,7 +813,7 @@ export class PomlParser {
   }
 
   private childrenToFxElements(
-    children: PomlElement[],
+    children: (PomlElement | PomlUnknownElement)[],
     options?: BuildOptions
   ): FxElement[] {
     return children.map((x) => this.pomlElementToFxElement(x, options))
@@ -860,7 +876,7 @@ export class PomlParser {
   }
 
   private pomlElementToFxElement(
-    pomlElement: PomlElement,
+    pomlElement: PomlElement | PomlUnknownElement,
     options?: BuildOptions
   ): FxElement {
     if (pomlElement.type == '?') {
