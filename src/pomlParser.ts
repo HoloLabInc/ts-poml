@@ -23,7 +23,8 @@ import {
   ArDisplay,
   ScriptElement,
   PomlScreenSpaceElement,
-  PomlUnknownElement,
+  PomlUnknown,
+  MaybePomlElement,
 } from '.'
 import {
   FxElement,
@@ -444,24 +445,22 @@ export class PomlParser {
 
   private filterPomlElements = (
     childElements: (
-      | PomlElement
+      | MaybePomlElement
       | CoordinateReference
       | ScriptElement
-      | PomlUnknownElement
     )[]
-  ): (PomlElement | PomlUnknownElement)[] => {
+  ): (MaybePomlElement)[] => {
     return childElements.filter(
-      (x): x is PomlElement | PomlUnknownElement =>
+      (x): x is MaybePomlElement =>
         'children' in x || x.type == '?'
     )
   }
 
   private filterCoordinateReferences = (
     childElements: (
-      | PomlElement
+      | MaybePomlElement
       | CoordinateReference
       | ScriptElement
-      | PomlUnknownElement
     )[]
   ): CoordinateReference[] => {
     return childElements.filter(
@@ -471,10 +470,9 @@ export class PomlParser {
 
   private filterScriptElements = (
     childElements: (
-      | PomlElement
+      | MaybePomlElement
       | CoordinateReference
       | ScriptElement
-      | PomlUnknownElement
     )[]
   ): ScriptElement[] => {
     return childElements.filter(
@@ -484,7 +482,7 @@ export class PomlParser {
 
   private fxElementToPomlElement(
     fxElement: FxElement
-  ): PomlElement | CoordinateReference | ScriptElement | PomlUnknownElement {
+  ): MaybePomlElement | CoordinateReference | ScriptElement {
     const commonAttr = fxElement[':@'] ?? {}
 
     // read common attributes
@@ -730,9 +728,7 @@ export class PomlParser {
       })
     }
 
-    // console.log('unknown element')
-    // console.log(Object.keys(fxElement)[0])
-    return new PomlUnknownElement(fxElement)
+    return new PomlUnknown(fxElement)
   }
 
   private fxGeometryToGeometry(
@@ -813,7 +809,7 @@ export class PomlParser {
   }
 
   private childrenToFxElements(
-    children: (PomlElement | PomlUnknownElement)[],
+    children: (MaybePomlElement)[],
     options?: BuildOptions
   ): FxElement[] {
     return children.map((x) => this.pomlElementToFxElement(x, options))
@@ -876,7 +872,7 @@ export class PomlParser {
   }
 
   private pomlElementToFxElement(
-    pomlElement: PomlElement | PomlUnknownElement,
+    pomlElement: MaybePomlElement,
     options?: BuildOptions
   ): FxElement {
     if (pomlElement.type == '?') {

@@ -37,7 +37,7 @@ export type Rotation = { x: number; y: number; z: number; w: number }
 export type ScaleByDistance = boolean | number
 
 export abstract class PomlElementBase {
-  children: (PomlElement | PomlUnknownElement)[] = []
+  children: MaybePomlElement[] = []
   coordinateReferences: CoordinateReference[] = []
   scriptElements: ScriptElement[] = []
 
@@ -82,6 +82,15 @@ export type PomlElement =
   | PomlGeometryElement
   | PomlCesium3dTilesElement
   | PomlScreenSpaceElement
+
+// MaybePomlElement is PomlElement or PomlUnknown
+// MaybePomlElement<'element'> is PomlElement
+// MaybePomlElement<'?'> is PomlUnknown
+export type MaybePomlElement<
+  T extends PomlElement['type'] | PomlUnknown['type'] =
+    | PomlElement['type']
+    | PomlUnknown['type']
+> = T extends '?' ? PomlUnknown : PomlElement
 
 export class PomlEmptyElement extends PomlElementBase {
   type: 'element' = 'element'
@@ -227,7 +236,7 @@ export class PomlScreenSpaceElement extends PomlElementBase {
   }
 }
 
-export class PomlUnknownElement {
+export class PomlUnknown {
   type: '?' = '?'
   _original: FxUnknownElement
 

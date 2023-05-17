@@ -735,7 +735,6 @@ describe('parse', () => {
     </poml>
     `
     const poml = parse(xml)
-    // console.log(poml.scene.children)
     expect(poml.scene.children?.length).toBe(3)
     expect(poml.scene.children?.[0].type).toBe('text')
     expect(poml.scene.children?.[1].type).toBe('?')
