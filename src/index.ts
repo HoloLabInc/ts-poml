@@ -73,7 +73,7 @@ export class Scene extends PomlElementBase {
   }
 }
 
-export type PomlElement =
+type PomlElementUnion =
   | PomlEmptyElement
   | PomlTextElement
   | PomlModelElement
@@ -83,14 +83,61 @@ export type PomlElement =
   | PomlCesium3dTilesElement
   | PomlScreenSpaceElement
 
-// MaybePomlElement is PomlElement or PomlUnknown
-// MaybePomlElement<'element'> is PomlElement
-// MaybePomlElement<'?'> is PomlUnknown
+/**
+ * PomlElement is a union type of all element types.
+ *
+ * - `PomlElement<'text'>` is `PomlTextElement`
+ * - `PomlElement` is `PomlEmptyElement | PomlTextElement | ... `, which is the same as union of all types.
+ *
+ * @typeParam T - element type
+ *
+ */
+export type PomlElement<
+  T extends PomlElementUnion['type'] = PomlElementUnion['type']
+> = T extends PomlEmptyElement['type']
+  ? PomlEmptyElement
+  : T extends PomlEmptyElement['type']
+  ? PomlEmptyElement
+  : T extends PomlTextElement['type']
+  ? PomlTextElement
+  : T extends PomlModelElement['type']
+  ? PomlModelElement
+  : T extends PomlImageElement['type']
+  ? PomlImageElement
+  : T extends PomlVideoElement['type']
+  ? PomlVideoElement
+  : T extends PomlGeometryElement['type']
+  ? PomlGeometryElement
+  : T extends PomlCesium3dTilesElement['type']
+  ? PomlCesium3dTilesElement
+  : T extends PomlScreenSpaceElement['type']
+  ? PomlScreenSpaceElement
+  : never
+
+type IsNever<T> = [T] extends [never] ? true : false
+type AssertTrue<T extends true> = never
+
+{
+  // static type assertion.
+  // PomlElement is same as PomlElementUnion
+  let _: AssertTrue<IsNever<Exclude<PomlElement, PomlElementUnion>>>
+  let __: AssertTrue<IsNever<Exclude<PomlElementUnion, PomlElement>>>
+}
+
+/**
+ * `PomlElement` or `PomlUnknown`
+ *
+ * - `MaybePomlElement<'text'>` is `PomlTextElement`
+ * - `MaybePomlElement<'?'>` is `PomlUnknown`
+ * - `MaybePomlElement` is `PomlElement | PomlUnknown`
+ */
 export type MaybePomlElement<
   T extends PomlElement['type'] | PomlUnknown['type'] =
     | PomlElement['type']
     | PomlUnknown['type']
-> = T extends '?' ? PomlUnknown : PomlElement
+> = T extends PomlUnknown['type']
+  ? PomlUnknown
+  : PomlElement<Exclude<T, PomlUnknown['type']>>
 
 export class PomlEmptyElement extends PomlElementBase {
   type: 'element' = 'element'
