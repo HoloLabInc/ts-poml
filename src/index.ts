@@ -57,19 +57,27 @@ export abstract class PomlElementBase {
   wsRecvUrl?: string
 
   customAttributes: Map<string, string>
+  _originalAttrs?: Map<string, string>
 
-  constructor(init: Partial<PomlElementBase>) {
+  constructor(
+    init: Partial<PomlElementBase>,
+    originalAttrs: Map<string, string> | undefined
+  ) {
     Object.assign(this, init)
     this.children ??= []
     this.coordinateReferences ??= []
     this.scriptElements ??= []
     this.customAttributes ??= new Map<string, string>()
+    this._originalAttrs = originalAttrs
   }
 }
 
 export class Scene extends PomlElementBase {
-  constructor(init?: Partial<Scene>) {
-    super(init ?? {})
+  constructor(
+    init?: Partial<Scene>,
+    originalAttrs: Map<string, string> | undefined = undefined
+  ) {
+    super(init ?? {}, originalAttrs)
   }
 }
 
@@ -140,8 +148,11 @@ export type MaybePomlElement<
 export class PomlEmptyElement extends PomlElementBase {
   type: 'element' = 'element'
 
-  constructor(init?: Partial<PomlEmptyElement>) {
-    super(init ?? {})
+  constructor(
+    init?: Partial<PomlEmptyElement>,
+    originalAttrs: Map<string, string> | undefined = undefined
+  ) {
+    super(init ?? {}, originalAttrs)
   }
 }
 
@@ -153,8 +164,11 @@ export class PomlTextElement extends PomlElementBase {
   fontColor?: string
   backgroundColor?: string
 
-  constructor(init?: Partial<PomlTextElement>) {
-    super(init ?? {})
+  constructor(
+    init?: Partial<PomlTextElement>,
+    originalAttrs: Map<string, string> | undefined = undefined
+  ) {
+    super(init ?? {}, originalAttrs)
   }
 }
 
@@ -163,8 +177,11 @@ export class PomlModelElement extends PomlElementBase {
   src?: string
   filename?: string
 
-  constructor(init?: Partial<PomlModelElement>) {
-    super(init ?? {})
+  constructor(
+    init?: Partial<PomlModelElement>,
+    originalAttrs: Map<string, string> | undefined = undefined
+  ) {
+    super(init ?? {}, originalAttrs)
   }
 }
 
@@ -173,8 +190,11 @@ export class PomlImageElement extends PomlElementBase {
   src?: string
   filename?: string
 
-  constructor(init?: Partial<PomlImageElement>) {
-    super(init ?? {})
+  constructor(
+    init?: Partial<PomlImageElement>,
+    originalAttrs: Map<string, string> | undefined = undefined
+  ) {
+    super(init ?? {}, originalAttrs)
   }
 }
 
@@ -183,8 +203,11 @@ export class PomlVideoElement extends PomlElementBase {
   src?: string
   filename?: string
 
-  constructor(init?: Partial<PomlVideoElement>) {
-    super(init ?? {})
+  constructor(
+    init?: Partial<PomlVideoElement>,
+    originalAttrs: Map<string, string> | undefined = undefined
+  ) {
+    super(init ?? {}, originalAttrs)
   }
 }
 
@@ -220,8 +243,11 @@ export class PomlGeometryElement extends PomlElementBase {
   type: 'geometry' = 'geometry'
   geometries: PomlGeometry[]
 
-  constructor(init?: Partial<PomlGeometryElement>) {
-    super(init ?? {})
+  constructor(
+    init?: Partial<PomlGeometryElement>,
+    originalAttrs: Map<string, string> | undefined = undefined
+  ) {
+    super(init ?? {}, originalAttrs)
     this.geometries ??= []
   }
 }
@@ -268,16 +294,22 @@ export class PomlCesium3dTilesElement extends PomlElementBase {
   src?: string
   filename?: string
 
-  constructor(init?: Partial<PomlCesium3dTilesElement>) {
-    super(init ?? {})
+  constructor(
+    init?: Partial<PomlCesium3dTilesElement>,
+    originalAttrs: Map<string, string> | undefined = undefined
+  ) {
+    super(init ?? {}, originalAttrs)
   }
 }
 
 export class PomlScreenSpaceElement extends PomlElementBase {
   type: 'screen-space' = 'screen-space'
 
-  constructor(init?: Partial<PomlScreenSpaceElement>) {
-    super(init ?? {})
+  constructor(
+    init?: Partial<PomlScreenSpaceElement>,
+    originalAttrs: Map<string, string> | undefined = undefined
+  ) {
+    super(init ?? {}, originalAttrs)
   }
 }
 
@@ -289,12 +321,3 @@ export class PomlUnknown {
     this._original = original
   }
 }
-
-// export class PomlCommentElement {
-//   type: '#comment' = '#comment'
-//   text: string
-
-//   constructor(text: string) {
-//     this.text = text ?? ''
-//   }
-// }

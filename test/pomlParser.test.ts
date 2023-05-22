@@ -1,5 +1,6 @@
 import {
   LineGeometry,
+  MaybePomlElement,
   Meta,
   Poml,
   PomlCesium3dTilesElement,
@@ -740,6 +741,26 @@ describe('parse', () => {
     expect(poml.scene.children?.[1].type).toBe('?')
     expect(poml.scene.children?.[2].type).toBe('model')
   })
+  test('unsupported attributes', () => {
+    const xml = `
+<poml>
+  <scene>
+    <element unsupported-attr="test">
+    </element>
+  </scene>
+</poml>
+`
+    const poml = parse(xml)
+    const child0 = poml.scene.children[0]
+    if (child0.type !== 'element') {
+      fail()
+    }
+    expect(child0._originalAttrs?.get('unsupported-attr')).toBe('test')
+
+    // unsupported attributes are retained when re-created
+    const xml2 = build(poml)
+    expect(xml2.trim()).toBe(xml.trim())
+  })
 
   test('meta tag', () => {
     expect(parse(`<poml></poml>`).meta).toBe(undefined)
@@ -1163,6 +1184,22 @@ describe('parse', () => {
   ])('build and parse %o', (poml) => {
     const xml = build(poml as Poml)
     const parsedPoml = parse(xml)
+
+    // remove _originalAttrs from parsedPoml (only for test)
+    const recurseChildren: (
+      children: MaybePomlElement[]
+    ) => MaybePomlElement[] = (children) =>
+      children.flatMap((element) =>
+        element.type === '?'
+          ? [element]
+          : [element, ...recurseChildren(element.children)]
+      )
+    recurseChildren(parsedPoml.scene.children).forEach((element) => {
+      if ('_originalAttrs' in element) {
+        element._originalAttrs = undefined
+      }
+    })
+
     expect(parsedPoml).toEqual(poml)
   })
 })
