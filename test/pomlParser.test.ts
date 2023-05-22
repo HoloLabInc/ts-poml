@@ -597,6 +597,13 @@ describe('parse', () => {
       longitude: 2,
       ellipsoidalHeight: 3,
       enuRotation: { x: 0.1, y: -0.2, z: -0.3, w: 0.4 },
+      _originalAttrs: new Map<string, string>([
+        ['id', 'placement-0'],
+        ['latitude', '1'],
+        ['longitude', '2'],
+        ['ellipsoidal-height', '3'],
+        ['enu-rotation', '0.1,-0.2,-0.3,0.4'],
+      ]),
     })
   })
 
@@ -630,6 +637,13 @@ describe('parse', () => {
       longitude: 2,
       ellipsoidalHeight: 3,
       enuRotation: { x: 0.1, y: -0.2, z: -0.3, w: 0.4 },
+      _originalAttrs: new Map<string, string>([
+        ['id', 'placement-0'],
+        ['latitude', '1'],
+        ['longitude', '2'],
+        ['ellipsoidal-height', '3'],
+        ['enu-rotation', '0.1,-0.2,-0.3,0.4'],
+      ]),
     })
   })
 
@@ -661,6 +675,13 @@ describe('parse', () => {
       spaceId: '123',
       position: { x: 1, y: 2, z: 3 },
       rotation: { x: 0.1, y: 0.2, z: 0.3, w: 0.4 },
+      _originalAttrs: new Map<string, string>([
+        ['type', 'space'],
+        ['space-type', 'immersal'],
+        ['space-id', '123'],
+        ['position', '1 2 3'],
+        ['rotation', '0.1,0.2,0.3,0.4'],
+      ]),
     })
   })
 
@@ -692,6 +713,13 @@ describe('parse', () => {
       spaceId: '123',
       position: { x: 1, y: 2, z: 3 },
       rotation: { x: 0.1, y: 0.2, z: 0.3, w: 0.4 },
+      _originalAttrs: new Map<string, string>([
+        ['type', 'space'],
+        ['space-type', 'immersal'],
+        ['space-id', '123'],
+        ['position', '1 2 3'],
+        ['rotation', '0.1,0.2,0.3,0.4'],
+      ]),
     })
   })
 
@@ -745,8 +773,12 @@ describe('parse', () => {
     const xml = `
 <poml>
   <scene>
+    <space-reference abcde="12345">
+    </space-reference>
     <element unsupported-attr="test">
     </element>
+    <script src="test.wasm" unsupported-attr="xyz">
+    </script>
   </scene>
 </poml>
 `
@@ -756,6 +788,12 @@ describe('parse', () => {
       fail()
     }
     expect(child0._originalAttrs?.get('unsupported-attr')).toBe('test')
+    expect(
+      poml.scene.scriptElements[0]._originalAttrs?.get('unsupported-attr')
+    ).toBe('xyz')
+    expect(
+      poml.scene.coordinateReferences[0]._originalAttrs?.get('abcde')
+    ).toBe('12345')
 
     // unsupported attributes are retained when re-created
     const xml2 = build(poml)
@@ -1194,10 +1232,25 @@ describe('parse', () => {
           ? [element]
           : [element, ...recurseChildren(element.children)]
       )
+
+    parsedPoml.scene._originalAttrs = undefined
+    parsedPoml.scene.scriptElements.forEach(
+      (s) => (s._originalAttrs = undefined)
+    )
+    parsedPoml.scene.coordinateReferences.forEach(
+      (s) => (s._originalAttrs = undefined)
+    )
     recurseChildren(parsedPoml.scene.children).forEach((element) => {
-      if ('_originalAttrs' in element) {
+      if (element.type !== '?') {
         element._originalAttrs = undefined
+        element.scriptElements.forEach((s) => (s._originalAttrs = undefined))
+        element.coordinateReferences.forEach(
+          (c) => (c._originalAttrs = undefined)
+        )
       }
+      // if ('_originalAttrs' in element) {
+      //   element._originalAttrs = undefined
+      // }
     })
 
     expect(parsedPoml).toEqual(poml)

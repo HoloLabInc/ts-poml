@@ -251,6 +251,16 @@ const parseCustomAttributes = (attributeObjet: object): Map<string, string> => {
   return customAttributes
 }
 
+const buildOriginalAttributes = (
+  originalAttrs: Map<string, string> | undefined
+) => {
+  return originalAttrs
+    ? Array.from(originalAttrs).reduce((obj, [key, value]) => {
+        return { ...obj, [`@_${key}`]: value }
+      }, {})
+    : {}
+}
+
 const buildGeoLocationOrRelativeString = (
   p: GeoLocation | RelativePosition
 ) => {
@@ -550,7 +560,7 @@ export class PomlParser {
           ...commonElement,
           ...childElements,
           src,
-          filename, 
+          filename,
         },
         originalAttrs
       )
@@ -685,6 +695,7 @@ export class PomlParser {
         spaceId,
         position,
         rotation,
+        _originalAttrs: originalAttrs,
       }
     }
 
@@ -702,6 +713,7 @@ export class PomlParser {
         longitude,
         ellipsoidalHeight,
         enuRotation,
+        _originalAttrs: originalAttrs,
       }
     }
 
@@ -717,6 +729,7 @@ export class PomlParser {
         src,
         filename,
         args,
+        _originalAttrs: originalAttrs,
       }
     }
 
@@ -836,7 +849,9 @@ export class PomlParser {
     coordinateReferences: CoordinateReference
   ): FxElement {
     if (coordinateReferences.type === 'space-reference') {
-      let attrs: FxSpaceReferenceElementAttributes = {}
+      let attrs: FxSpaceReferenceElementAttributes = {
+        ...buildOriginalAttributes(coordinateReferences._originalAttrs),
+      }
       this.setAttribute(attrs, '@_id', coordinateReferences.id)
       this.setAttribute(attrs, '@_space-id', coordinateReferences.spaceId)
       this.setAttribute(attrs, '@_space-type', coordinateReferences.spaceType)
@@ -877,7 +892,9 @@ export class PomlParser {
   }
 
   private scriptElementToFxElement(scriptElement: ScriptElement): FxElement {
-    let attrs: FxScriptElementAttributes = {}
+    let attrs: FxScriptElementAttributes = {
+      ...buildOriginalAttributes(scriptElement._originalAttrs),
+    }
     this.setAttribute(attrs, '@_id', scriptElement.id)
     this.setAttribute(attrs, '@_src', scriptElement.src)
     this.setAttribute(attrs, '@_filename', scriptElement.filename)
@@ -896,11 +913,7 @@ export class PomlParser {
       return pomlElement._original
     }
 
-    const originalAttrs = pomlElement._originalAttrs
-      ? Array.from(pomlElement._originalAttrs).reduce((obj, [key, value]) => {
-          return { ...obj, [`@_${key}`]: value }
-        }, {})
-      : {}
+    const originalAttrs = buildOriginalAttributes(pomlElement._originalAttrs)
     // common attributes
     let commonAttributes: FxElementAttributesBase = {}
 

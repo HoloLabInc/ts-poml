@@ -220,6 +220,7 @@ export interface SpaceReference {
   spaceId?: string
   position?: Position
   rotation?: Rotation
+  _originalAttrs?: Map<string, string>
 }
 
 export interface GeoReference {
@@ -229,6 +230,7 @@ export interface GeoReference {
   longitude?: number
   ellipsoidalHeight?: number
   enuRotation?: Rotation
+  _originalAttrs?: Map<string, string>
 }
 
 export interface ScriptElement {
@@ -237,6 +239,7 @@ export interface ScriptElement {
   src?: string
   filename?: string
   args: string[]
+  _originalAttrs?: Map<string, string>
 }
 
 export class PomlGeometryElement extends PomlElementBase {
