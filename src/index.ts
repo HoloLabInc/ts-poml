@@ -96,8 +96,6 @@ export type PomlElement<
   T extends PomlElementUnion['type'] = PomlElementUnion['type']
 > = T extends PomlEmptyElement['type']
   ? PomlEmptyElement
-  : T extends PomlEmptyElement['type']
-  ? PomlEmptyElement
   : T extends PomlTextElement['type']
   ? PomlTextElement
   : T extends PomlModelElement['type']
