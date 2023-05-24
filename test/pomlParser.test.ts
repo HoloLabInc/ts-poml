@@ -597,7 +597,7 @@ describe('parse', () => {
       longitude: 2,
       ellipsoidalHeight: 3,
       enuRotation: { x: 0.1, y: -0.2, z: -0.3, w: 0.4 },
-      _originalAttrs: new Map<string, string>([
+      originalAttrs: new Map<string, string>([
         ['id', 'placement-0'],
         ['latitude', '1'],
         ['longitude', '2'],
@@ -637,7 +637,7 @@ describe('parse', () => {
       longitude: 2,
       ellipsoidalHeight: 3,
       enuRotation: { x: 0.1, y: -0.2, z: -0.3, w: 0.4 },
-      _originalAttrs: new Map<string, string>([
+      originalAttrs: new Map<string, string>([
         ['id', 'placement-0'],
         ['latitude', '1'],
         ['longitude', '2'],
@@ -675,7 +675,7 @@ describe('parse', () => {
       spaceId: '123',
       position: { x: 1, y: 2, z: 3 },
       rotation: { x: 0.1, y: 0.2, z: 0.3, w: 0.4 },
-      _originalAttrs: new Map<string, string>([
+      originalAttrs: new Map<string, string>([
         ['type', 'space'],
         ['space-type', 'immersal'],
         ['space-id', '123'],
@@ -713,7 +713,7 @@ describe('parse', () => {
       spaceId: '123',
       position: { x: 1, y: 2, z: 3 },
       rotation: { x: 0.1, y: 0.2, z: 0.3, w: 0.4 },
-      _originalAttrs: new Map<string, string>([
+      originalAttrs: new Map<string, string>([
         ['type', 'space'],
         ['space-type', 'immersal'],
         ['space-id', '123'],
@@ -787,12 +787,12 @@ describe('parse', () => {
     if (child0.type !== 'element') {
       fail()
     }
-    expect(child0._originalAttrs?.get('unsupported-attr')).toBe('test')
+    expect(child0.originalAttrs?.get('unsupported-attr')).toBe('test')
     expect(
-      poml.scene.scriptElements[0]._originalAttrs?.get('unsupported-attr')
+      poml.scene.scriptElements[0].originalAttrs?.get('unsupported-attr')
     ).toBe('xyz')
     expect(
-      poml.scene.coordinateReferences[0]._originalAttrs?.get('abcde')
+      poml.scene.coordinateReferences[0].originalAttrs?.get('abcde')
     ).toBe('12345')
 
     // unsupported attributes are retained when re-created
@@ -1233,24 +1233,21 @@ describe('parse', () => {
           : [element, ...recurseChildren(element.children)]
       )
 
-    parsedPoml.scene._originalAttrs = undefined
+    parsedPoml.scene.originalAttrs = undefined
     parsedPoml.scene.scriptElements.forEach(
-      (s) => (s._originalAttrs = undefined)
+      (s) => (s.originalAttrs = undefined)
     )
     parsedPoml.scene.coordinateReferences.forEach(
-      (s) => (s._originalAttrs = undefined)
+      (s) => (s.originalAttrs = undefined)
     )
     recurseChildren(parsedPoml.scene.children).forEach((element) => {
       if (element.type !== '?') {
-        element._originalAttrs = undefined
-        element.scriptElements.forEach((s) => (s._originalAttrs = undefined))
+        element.originalAttrs = undefined
+        element.scriptElements.forEach((s) => (s.originalAttrs = undefined))
         element.coordinateReferences.forEach(
-          (c) => (c._originalAttrs = undefined)
+          (c) => (c.originalAttrs = undefined)
         )
       }
-      // if ('_originalAttrs' in element) {
-      //   element._originalAttrs = undefined
-      // }
     })
 
     expect(parsedPoml).toEqual(poml)

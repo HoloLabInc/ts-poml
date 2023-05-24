@@ -57,7 +57,7 @@ export abstract class PomlElementBase {
   wsRecvUrl?: string
 
   customAttributes: Map<string, string>
-  _originalAttrs?: Map<string, string>
+  originalAttrs?: Map<string, string>
 
   constructor(
     init: Partial<PomlElementBase>,
@@ -68,7 +68,7 @@ export abstract class PomlElementBase {
     this.coordinateReferences ??= []
     this.scriptElements ??= []
     this.customAttributes ??= new Map<string, string>()
-    this._originalAttrs = originalAttrs
+    this.originalAttrs = originalAttrs
   }
 }
 
@@ -220,7 +220,7 @@ export interface SpaceReference {
   spaceId?: string
   position?: Position
   rotation?: Rotation
-  _originalAttrs?: Map<string, string>
+  originalAttrs?: Map<string, string>
 }
 
 export interface GeoReference {
@@ -230,7 +230,7 @@ export interface GeoReference {
   longitude?: number
   ellipsoidalHeight?: number
   enuRotation?: Rotation
-  _originalAttrs?: Map<string, string>
+  originalAttrs?: Map<string, string>
 }
 
 export interface ScriptElement {
@@ -239,7 +239,7 @@ export interface ScriptElement {
   src?: string
   filename?: string
   args: string[]
-  _originalAttrs?: Map<string, string>
+  originalAttrs?: Map<string, string>
 }
 
 export class PomlGeometryElement extends PomlElementBase {

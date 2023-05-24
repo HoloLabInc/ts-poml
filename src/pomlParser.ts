@@ -695,7 +695,7 @@ export class PomlParser {
         spaceId,
         position,
         rotation,
-        _originalAttrs: originalAttrs,
+        originalAttrs: originalAttrs,
       }
     }
 
@@ -713,7 +713,7 @@ export class PomlParser {
         longitude,
         ellipsoidalHeight,
         enuRotation,
-        _originalAttrs: originalAttrs,
+        originalAttrs: originalAttrs,
       }
     }
 
@@ -729,7 +729,7 @@ export class PomlParser {
         src,
         filename,
         args,
-        _originalAttrs: originalAttrs,
+        originalAttrs: originalAttrs,
       }
     }
 
@@ -850,7 +850,7 @@ export class PomlParser {
   ): FxElement {
     if (coordinateReferences.type === 'space-reference') {
       let attrs: FxSpaceReferenceElementAttributes = {
-        ...buildOriginalAttributes(coordinateReferences._originalAttrs),
+        ...buildOriginalAttributes(coordinateReferences.originalAttrs),
       }
       this.setAttribute(attrs, '@_id', coordinateReferences.id)
       this.setAttribute(attrs, '@_space-id', coordinateReferences.spaceId)
@@ -893,7 +893,7 @@ export class PomlParser {
 
   private scriptElementToFxElement(scriptElement: ScriptElement): FxElement {
     let attrs: FxScriptElementAttributes = {
-      ...buildOriginalAttributes(scriptElement._originalAttrs),
+      ...buildOriginalAttributes(scriptElement.originalAttrs),
     }
     this.setAttribute(attrs, '@_id', scriptElement.id)
     this.setAttribute(attrs, '@_src', scriptElement.src)
@@ -913,7 +913,7 @@ export class PomlParser {
       return pomlElement._original
     }
 
-    const originalAttrs = buildOriginalAttributes(pomlElement._originalAttrs)
+    const originalAttrs = buildOriginalAttributes(pomlElement.originalAttrs)
     // common attributes
     let commonAttributes: FxElementAttributesBase = {}
 
