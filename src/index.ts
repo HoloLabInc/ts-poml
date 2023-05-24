@@ -318,9 +318,9 @@ export class PomlScreenSpaceElement extends PomlElementBase {
 
 export class PomlUnknown {
   type: '?' = '?'
-  _original: FxUnknownElement
+  original: FxUnknownElement
 
   constructor(original: FxUnknownElement) {
-    this._original = original
+    this.original = original
   }
 }

@@ -910,7 +910,7 @@ export class PomlParser {
     options?: BuildOptions
   ): FxElement {
     if (pomlElement.type === '?') {
-      return pomlElement._original
+      return pomlElement.original
     }
 
     const originalAttrs = buildOriginalAttributes(pomlElement.originalAttrs)

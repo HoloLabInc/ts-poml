@@ -1223,7 +1223,7 @@ describe('parse', () => {
     const xml = build(poml as Poml)
     const parsedPoml = parse(xml)
 
-    // remove _originalAttrs from parsedPoml (only for test)
+    // remove originalAttrs from parsedPoml (only for test)
     const recurseChildren: (
       children: MaybePomlElement[]
     ) => MaybePomlElement[] = (children) =>
