@@ -10,10 +10,11 @@ import {
   PomlModelElement,
   PomlScreenSpaceElement,
   PomlTextElement,
+  PomlUnknown,
   PomlVideoElement,
   Scene,
 } from '../src'
-import { FxPomlRoot } from '../src/fastXmlParserPomlType'
+import { FxPomlRoot, FxUnknownElement } from '../src/fastXmlParserPomlType'
 import { BuildOptions, PomlParser } from '../src/pomlParser'
 
 const parse = (xml: string) => {
@@ -764,11 +765,24 @@ describe('parse', () => {
     </poml>
     `
     const poml = parse(xml)
+
+    expect(poml.scene.coordinateReferences.length).toBe(0)
+
     expect(poml.scene.children?.length).toBe(3)
     expect(poml.scene.children?.[0].type).toBe('text')
+
     expect(poml.scene.children?.[1].type).toBe('?')
+    if (poml.scene.children?.[1].type != '?') {
+      fail()
+    }
+
+    expect(poml.scene.children?.[1].original).toHaveProperty(
+      'unsupported-element'
+    )
+
     expect(poml.scene.children?.[2].type).toBe('model')
   })
+
   test('unsupported attributes', () => {
     const xml = `
 <poml>
@@ -791,9 +805,9 @@ describe('parse', () => {
     expect(
       poml.scene.scriptElements[0].originalAttrs?.get('unsupported-attr')
     ).toBe('xyz')
-    expect(
-      poml.scene.coordinateReferences[0].originalAttrs?.get('abcde')
-    ).toBe('12345')
+    expect(poml.scene.coordinateReferences[0].originalAttrs?.get('abcde')).toBe(
+      '12345'
+    )
 
     // unsupported attributes are retained when re-created
     const xml2 = build(poml)
@@ -923,8 +937,44 @@ describe('parse', () => {
     `)
     expect(poml.scene.children.length).toBe(3)
     expect(poml.scene.children[0].type).toBe('element')
-    expect(poml.scene.children[1].type).toBe('?')
+
+    if (poml.scene.children[1].type != '?') {
+      fail()
+    }
+    expect(poml.scene.children[1].original).toEqual({
+      '#comment': [{ '#text': ' comment ' }],
+    })
+
     expect(poml.scene.children[2].type).toBe('element')
+
+    expect(poml.scene.coordinateReferences.length).toBe(0)
+  })
+
+  test('comment under element tag test', () => {
+    const poml = parse(`
+    <poml>
+      <scene>
+        <element>
+          <!-- comment -->
+        </element>
+      </scene>
+    </poml>
+    `)
+    expect(poml.scene.children.length).toBe(1)
+
+    if (poml.scene.children[0].type != 'element') {
+      fail()
+    }
+
+    expect(poml.scene.children[0].coordinateReferences.length).toBe(0)
+
+    if (poml.scene.children[0].children[0].type != '?') {
+      fail()
+    }
+
+    expect(poml.scene.children[0].children[0].original).toEqual({
+      '#comment': [{ '#text': ' comment ' }],
+    })
   })
 
   // build and parse tests
