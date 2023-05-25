@@ -465,16 +465,15 @@ export class PomlParser {
     childElements: (MaybePomlElement | CoordinateReference | ScriptElement)[]
   ): CoordinateReference[] => {
     return childElements.filter(
-      (x): x is CoordinateReference => !('children' in x) && !('src' in x)
+      (x): x is CoordinateReference =>
+        x.type === 'space-reference' || x.type === 'geo-reference'
     )
   }
 
   private filterScriptElements = (
     childElements: (MaybePomlElement | CoordinateReference | ScriptElement)[]
   ): ScriptElement[] => {
-    return childElements.filter(
-      (x): x is ScriptElement => !('children' in x) && 'src' in x
-    )
+    return childElements.filter((x): x is ScriptElement => x.type === 'script')
   }
 
   private fxElementToPomlElement(
