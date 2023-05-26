@@ -4,6 +4,7 @@ const parse = (xml: string) => {
   const options = {
     ignoreAttributes: false,
     preserveOrder: true,
+    commentPropName: '#comment',
   }
   const parser = new XMLParser(options)
   const result = parser.parse(xml)
@@ -87,6 +88,38 @@ describe('parse', () => {
               { model: [], ':@': { '@_src': 'model1' } },
               { element: [] },
               { model: [], ':@': { '@_src': 'model2' } },
+            ],
+          },
+        ],
+      },
+    ])
+  })
+
+  test('comment test', () => {
+    const xml = `
+    <poml>
+      <scene>
+        <element/>
+        <text/>
+        <!--This is a comment-->
+        <!--aaa bbb ccc-->
+      </scene>
+    </poml>
+    `
+    const result = parse(xml)
+    expect(result).toEqual([
+      {
+        poml: [
+          {
+            scene: [
+              { element: [] },
+              { text: [] },
+              {
+                '#comment': [{ '#text': 'This is a comment' }],
+              },
+              {
+                '#comment': [{ '#text': 'aaa bbb ccc' }],
+              },
             ],
           },
         ],

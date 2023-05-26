@@ -23,6 +23,8 @@ import {
   ArDisplay,
   ScriptElement,
   PomlScreenSpaceElement,
+  PomlUnknown,
+  MaybePomlElement,
 } from '.'
 import {
   FxElement,
@@ -249,6 +251,16 @@ const parseCustomAttributes = (attributeObjet: object): Map<string, string> => {
   return customAttributes
 }
 
+const buildOriginalAttributes = (
+  originalAttrs: Map<string, string> | undefined
+) => {
+  return originalAttrs
+    ? Array.from(originalAttrs).reduce((obj, [key, value]) => {
+        return { ...obj, [`@_${key}`]: value }
+      }, {})
+    : {}
+}
+
 const buildGeoLocationOrRelativeString = (
   p: GeoLocation | RelativePosition
 ) => {
@@ -292,6 +304,7 @@ export class PomlParser {
     const options = {
       ignoreAttributes: false,
       preserveOrder: true,
+      commentPropName: '#comment',
     }
 
     const parser = new XMLParser(options)
@@ -327,6 +340,7 @@ export class PomlParser {
       ignoreAttributes: false,
       preserveOrder: true,
       format: true,
+      commentPropName: '#comment',
     }
 
     const builder = new XMLBuilder(options)
@@ -440,45 +454,46 @@ export class PomlParser {
   }
 
   private filterPomlElements = (
-    childElements: (PomlElement | CoordinateReference | ScriptElement)[]
-  ): PomlElement[] => {
-    return childElements.filter((x): x is PomlElement => 'children' in x)
+    childElements: (MaybePomlElement | CoordinateReference | ScriptElement)[]
+  ): MaybePomlElement[] => {
+    return childElements.filter(
+      (x): x is MaybePomlElement => 'children' in x || x.type == '?'
+    )
   }
 
   private filterCoordinateReferences = (
-    childElements: (PomlElement | CoordinateReference | ScriptElement)[]
+    childElements: (MaybePomlElement | CoordinateReference | ScriptElement)[]
   ): CoordinateReference[] => {
     return childElements.filter(
-      (x): x is CoordinateReference => !('children' in x) && !('src' in x)
+      (x): x is CoordinateReference =>
+        x.type === 'space-reference' || x.type === 'geo-reference'
     )
   }
 
   private filterScriptElements = (
-    childElements: (PomlElement | CoordinateReference | ScriptElement)[]
+    childElements: (MaybePomlElement | CoordinateReference | ScriptElement)[]
   ): ScriptElement[] => {
-    return childElements.filter(
-      (x): x is ScriptElement => !('children' in x) && 'src' in x
-    )
+    return childElements.filter((x): x is ScriptElement => x.type === 'script')
   }
 
   private fxElementToPomlElement(
     fxElement: FxElement
-  ): PomlElement | CoordinateReference | ScriptElement {
-    const commonAttr = fxElement[':@'] ?? {}
+  ): MaybePomlElement | CoordinateReference | ScriptElement {
+    const attributes = fxElement[':@'] ?? {}
 
     // read common attributes
-    const rotationMode = commonAttr['@_rotation-mode']
-    const position = parsePositionString(commonAttr['@_position'])
-    const scale = parseScaleString(commonAttr['@_scale'])
-    const rotation = parseRotationString(commonAttr['@_rotation'])
+    const rotationMode = attributes['@_rotation-mode']
+    const position = parsePositionString(attributes['@_position'])
+    const scale = parseScaleString(attributes['@_scale'])
+    const rotation = parseRotationString(attributes['@_rotation'])
 
     const scaleByDistance = parseAsBooleanOrNumber(
-      commonAttr['@_scale-by-distance']
+      attributes['@_scale-by-distance']
     )
-    const minScale = parseScaleString(commonAttr['@_min-scale'])
-    const maxScale = parseScaleString(commonAttr['@_max-scale'])
+    const minScale = parseScaleString(attributes['@_min-scale'])
+    const maxScale = parseScaleString(attributes['@_max-scale'])
     const display: Display | undefined = (() => {
-      switch (commonAttr['@_display']) {
+      switch (attributes['@_display']) {
         case 'none':
           return 'none'
         case 'occlusion':
@@ -490,7 +505,7 @@ export class PomlParser {
       }
     })()
     const arDisplay: ArDisplay | undefined = (() => {
-      switch (commonAttr['@_ar-display']) {
+      switch (attributes['@_ar-display']) {
         case 'none':
           return 'none'
         case 'occlusion':
@@ -503,11 +518,17 @@ export class PomlParser {
           return undefined
       }
     })()
-    const id = commonAttr['@_id']
-    const webLink = commonAttr['@_web-link']
-    const wsRecvUrl = commonAttr['@_ws-recv-url']
+    const id = attributes['@_id']
+    const webLink = attributes['@_web-link']
+    const wsRecvUrl = attributes['@_ws-recv-url']
 
-    const customAttributes = parseCustomAttributes(commonAttr)
+    const customAttributes = parseCustomAttributes(attributes)
+
+    const originalAttrs = new Map<string, string>(
+      Object.entries(attributes)
+        .filter(([key, value]) => key.startsWith('@_'))
+        .map(([key, value]) => [key.substring(2), value])
+    )
 
     let commonElement = {
       rotationMode,
@@ -533,12 +554,15 @@ export class PomlParser {
 
       const childElements = this.parseChildren(fxElement.model)
 
-      return new PomlModelElement({
-        ...commonElement,
-        ...childElements,
-        src,
-        filename,
-      })
+      return new PomlModelElement(
+        {
+          ...commonElement,
+          ...childElements,
+          src,
+          filename,
+        },
+        originalAttrs
+      )
     }
 
     // text tag
@@ -551,14 +575,17 @@ export class PomlParser {
 
       const childElements = this.parseChildren(fxElement.text)
 
-      return new PomlTextElement({
-        ...commonElement,
-        ...childElements,
-        text,
-        fontSize,
-        fontColor,
-        backgroundColor,
-      })
+      return new PomlTextElement(
+        {
+          ...commonElement,
+          ...childElements,
+          text,
+          fontSize,
+          fontColor,
+          backgroundColor,
+        },
+        originalAttrs
+      )
     }
 
     // image tag
@@ -569,12 +596,15 @@ export class PomlParser {
 
       const childElements = this.parseChildren(fxElement.image)
 
-      return new PomlImageElement({
-        ...commonElement,
-        ...childElements,
-        src,
-        filename,
-      })
+      return new PomlImageElement(
+        {
+          ...commonElement,
+          ...childElements,
+          src,
+          filename,
+        },
+        originalAttrs
+      )
     }
 
     // video tag
@@ -584,12 +614,15 @@ export class PomlParser {
       const filename = attr['@_filename']
       const childElements = this.parseChildren(fxElement.video)
 
-      return new PomlVideoElement({
-        ...commonElement,
-        ...childElements,
-        src,
-        filename,
-      })
+      return new PomlVideoElement(
+        {
+          ...commonElement,
+          ...childElements,
+          src,
+          filename,
+        },
+        originalAttrs
+      )
     }
 
     // cesium3dtiles tag
@@ -599,12 +632,15 @@ export class PomlParser {
       const filename = attr['@_filename']
       const childElements = this.parseChildren(fxElement.cesium3dtiles)
 
-      return new PomlCesium3dTilesElement({
-        ...commonElement,
-        ...childElements,
-        src,
-        filename,
-      })
+      return new PomlCesium3dTilesElement(
+        {
+          ...commonElement,
+          ...childElements,
+          src,
+          filename,
+        },
+        originalAttrs
+      )
     }
 
     // geometry tag
@@ -636,11 +672,14 @@ export class PomlParser {
         }
       })
       const childElements = this.parseChildren(fxChildren)
-      return new PomlGeometryElement({
-        ...commonElement,
-        ...childElements,
-        geometries: geometries,
-      })
+      return new PomlGeometryElement(
+        {
+          ...commonElement,
+          ...childElements,
+          geometries: geometries,
+        },
+        originalAttrs
+      )
     }
 
     // space-reference, space-placement tag
@@ -655,6 +694,7 @@ export class PomlParser {
         spaceId,
         position,
         rotation,
+        originalAttrs: originalAttrs,
       }
     }
 
@@ -672,6 +712,7 @@ export class PomlParser {
         longitude,
         ellipsoidalHeight,
         enuRotation,
+        originalAttrs: originalAttrs,
       }
     }
 
@@ -687,6 +728,7 @@ export class PomlParser {
         src,
         filename,
         args,
+        originalAttrs: originalAttrs,
       }
     }
 
@@ -694,18 +736,28 @@ export class PomlParser {
     if ('screen-space' in fxElement) {
       const childElements = this.parseChildren(fxElement['screen-space'] ?? [])
 
-      return new PomlScreenSpaceElement({
-        ...commonElement,
-        ...childElements,
-      })
+      return new PomlScreenSpaceElement(
+        {
+          ...commonElement,
+          ...childElements,
+        },
+        originalAttrs
+      )
     }
 
-    const childElements = this.parseChildren(fxElement.element ?? [])
+    if ('element' in fxElement) {
+      const childElements = this.parseChildren(fxElement.element ?? [])
 
-    return new PomlEmptyElement({
-      ...commonElement,
-      ...childElements,
-    })
+      return new PomlEmptyElement(
+        {
+          ...commonElement,
+          ...childElements,
+        },
+        originalAttrs
+      )
+    }
+
+    return new PomlUnknown(fxElement)
   }
 
   private fxGeometryToGeometry(
@@ -786,7 +838,7 @@ export class PomlParser {
   }
 
   private childrenToFxElements(
-    children: PomlElement[],
+    children: MaybePomlElement[],
     options?: BuildOptions
   ): FxElement[] {
     return children.map((x) => this.pomlElementToFxElement(x, options))
@@ -796,7 +848,9 @@ export class PomlParser {
     coordinateReferences: CoordinateReference
   ): FxElement {
     if (coordinateReferences.type === 'space-reference') {
-      let attrs: FxSpaceReferenceElementAttributes = {}
+      let attrs: FxSpaceReferenceElementAttributes = {
+        ...buildOriginalAttributes(coordinateReferences.originalAttrs),
+      }
       this.setAttribute(attrs, '@_id', coordinateReferences.id)
       this.setAttribute(attrs, '@_space-id', coordinateReferences.spaceId)
       this.setAttribute(attrs, '@_space-type', coordinateReferences.spaceType)
@@ -837,7 +891,9 @@ export class PomlParser {
   }
 
   private scriptElementToFxElement(scriptElement: ScriptElement): FxElement {
-    let attrs: FxScriptElementAttributes = {}
+    let attrs: FxScriptElementAttributes = {
+      ...buildOriginalAttributes(scriptElement.originalAttrs),
+    }
     this.setAttribute(attrs, '@_id', scriptElement.id)
     this.setAttribute(attrs, '@_src', scriptElement.src)
     this.setAttribute(attrs, '@_filename', scriptElement.filename)
@@ -849,9 +905,14 @@ export class PomlParser {
   }
 
   private pomlElementToFxElement(
-    pomlElement: PomlElement,
+    pomlElement: MaybePomlElement,
     options?: BuildOptions
   ): FxElement {
+    if (pomlElement.type === '?') {
+      return pomlElement.original
+    }
+
+    const originalAttrs = buildOriginalAttributes(pomlElement.originalAttrs)
     // common attributes
     let commonAttributes: FxElementAttributesBase = {}
 
@@ -900,6 +961,7 @@ export class PomlParser {
 
     if (pomlElement.type == 'model') {
       let modelAttributes: FxModelElementAttributes = {
+        ...originalAttrs,
         ...commonAttributes,
       }
       this.setAttribute(modelAttributes, '@_src', pomlElement.src)
@@ -918,6 +980,7 @@ export class PomlParser {
 
     if (pomlElement.type == 'text') {
       let textAttributes: FxTextElementAttributes = {
+        ...originalAttrs,
         ...commonAttributes,
       }
       this.setAttribute(textAttributes, '@_text', pomlElement.text)
@@ -942,6 +1005,7 @@ export class PomlParser {
 
     if (pomlElement.type == 'image') {
       let imageAttributes: FxImageElementAttributes = {
+        ...originalAttrs,
         ...commonAttributes,
       }
       this.setAttribute(imageAttributes, '@_src', pomlElement.src)
@@ -960,6 +1024,7 @@ export class PomlParser {
 
     if (pomlElement.type == 'video') {
       let videoAttributes: FxVideoElementAttributes = {
+        ...originalAttrs,
         ...commonAttributes,
       }
       this.setAttribute(videoAttributes, '@_src', pomlElement.src)
@@ -978,6 +1043,7 @@ export class PomlParser {
 
     if (pomlElement.type == 'geometry') {
       let geometryAttributes: FxGeometryElementAttributes = {
+        ...originalAttrs,
         ...commonAttributes,
       }
       const positionType = pomlElement.geometries[0].positionType
@@ -1004,6 +1070,7 @@ export class PomlParser {
 
     if (pomlElement.type == 'cesium3dtiles') {
       let cesium3dTilesAttributes: FxCesium3dTilesElementAttributes = {
+        ...originalAttrs,
         ...commonAttributes,
       }
       this.setAttribute(cesium3dTilesAttributes, '@_src', pomlElement.src)
@@ -1033,7 +1100,10 @@ export class PomlParser {
           ...this.childrenToFxElements(pomlElement.children, options),
           ...scriptElements,
         ],
-        ':@': commonAttributes,
+        ':@': {
+          ...originalAttrs,
+          ...commonAttributes,
+        },
       }
     }
 
@@ -1045,7 +1115,10 @@ export class PomlParser {
         ...this.childrenToFxElements(pomlElement.children, options),
         ...scriptElements,
       ],
-      ':@': commonAttributes,
+      ':@': {
+        ...originalAttrs,
+        ...commonAttributes,
+      },
     }
   }
 

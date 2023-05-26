@@ -33,6 +33,7 @@ export type FxElement =
   | FxCesium3dTilesElement
   | FxScriptElement
   | FxScreenSpaceElement
+  | FxUnknownElement
 
 export interface FxEmptyElement {
   ':@'?: FxElementAttributesBase
@@ -187,4 +188,8 @@ export interface FxCesium3dTilesElement {
 export interface FxScreenSpaceElement {
   ':@'?: FxElementAttributesBase
   'screen-space': FxElement[]
+}
+
+export interface FxUnknownElement {
+  ':@'?: FxElementAttributesBase
 }

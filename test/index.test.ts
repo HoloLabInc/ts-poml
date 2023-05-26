@@ -22,6 +22,9 @@ describe('poml element initialization', () => {
       children: [new PomlEmptyElement()],
     })
     expect(el.children?.length).toBe(1)
+    if (!('children' in el.children?.[0])) {
+      fail()
+    }
     expect(el.children?.[0].children?.length).toBe(0)
   })
 })
