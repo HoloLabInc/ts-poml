@@ -1269,6 +1269,24 @@ describe('parse', () => {
         ],
       }),
     },
+    {
+      scene: Poml.scene({
+        children: [
+          new PomlEmptyElement(),
+          new PomlUnknown({
+            '#comment': [{ '#text': 'comment' }],
+          } as FxUnknownElement),
+          new PomlEmptyElement(),
+          new PomlEmptyElement({
+            children: [
+              new PomlUnknown({
+                '#comment': [{ '#text': 'comment2' }],
+              } as FxUnknownElement),
+            ],
+          }),
+        ],
+      }),
+    },
   ])('build and parse %o', (poml) => {
     const xml = build(poml as Poml)
     const parsedPoml = parse(xml)
