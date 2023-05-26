@@ -783,6 +783,42 @@ describe('parse', () => {
     expect(poml.scene.children?.[2].type).toBe('model')
   })
 
+  test('elements under unsupported element tag are contained in original property', () => {
+    const xml = `
+    <poml>
+      <scene>
+        <unsupported-element>
+          <model src="test"></model>
+        </unsupported-element>
+      </scene>
+    </poml>
+    `
+    const poml = parse(xml)
+
+    expect(poml.scene.coordinateReferences.length).toBe(0)
+
+    expect(poml.scene.children?.length).toBe(1)
+
+    if (poml.scene.children?.[0].type != '?') {
+      fail()
+    }
+
+    expect(poml.scene.children?.[0].original).toHaveProperty(
+      'unsupported-element'
+    )
+
+    if (!('unsupported-element' in poml.scene.children?.[0].original)) {
+      fail()
+    }
+
+    const children = (poml.scene.children?.[0].original as any)[
+      'unsupported-element'
+    ]
+    expect(children.length).toBe(1)
+    expect(children[0]).toHaveProperty('model')
+    expect(children[0][':@']).toHaveProperty('@_src', 'test')
+  })
+
   test('unsupported attributes', () => {
     const xml = `
 <poml>
@@ -1284,6 +1320,35 @@ describe('parse', () => {
               } as FxUnknownElement),
             ],
           }),
+        ],
+      }),
+    },
+    {
+      scene: Poml.scene({
+        children: [
+          new PomlEmptyElement(),
+          new PomlUnknown({
+            'unsupported-tag': [],
+            ':@': { '@_unsuppreted-attr': 'value' },
+          } as FxUnknownElement),
+        ],
+      }),
+    },
+    {
+      scene: Poml.scene({
+        children: [
+          new PomlUnknown({
+            'unsupported-tag': [
+              {
+                model: [],
+                ':@': {
+                  '@_src': 'value1',
+                  '@_unsuppreted-attr': 'value2',
+                },
+              },
+            ],
+            ':@': { '@_unsuppreted-attr': 'value3' },
+          } as FxUnknownElement),
         ],
       }),
     },
