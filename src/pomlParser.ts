@@ -27,6 +27,7 @@ import {
   MaybePomlElement,
   RelativePositions,
   GeoLocations,
+  PolygonGeometry,
 } from '.'
 import {
   FxElement,
@@ -175,6 +176,21 @@ const parseAsQuaternion = (text: string | undefined) => {
   return undefined
 }
 
+const parseAsNumberArray = (text: string | undefined) => {
+  if (!text) {
+    return undefined
+  }
+
+  const r = /[,\s]+/g
+  const tokens = text.split(r)
+
+  const numbers = tokens
+    .map((x) => Number.parseFloat(x))
+    .filter((x) => !Number.isNaN(x))
+
+  return numbers
+}
+
 const parseAsStringArray = (text: string | undefined): string[] => {
   if (!text) {
     return []
@@ -240,6 +256,52 @@ const parseRelativePositionString = (
   return {
     type: 'relative',
     ...p,
+  }
+}
+
+const parseGeoLocationsString = (
+  text: string | undefined
+): GeoLocations | undefined => {
+  const numbers = parseAsNumberArray(text)
+  if (numbers === undefined) {
+    return undefined
+  }
+
+  const positions = []
+  const length = Math.floor(numbers.length / 3)
+  for (let i = 0; i < length; i++) {
+    const longitude = numbers[i * 3]
+    const latitude = numbers[i * 3 + 1]
+    const ellipsoidalHeight = numbers[i * 3 + 2]
+    positions.push({ longitude, latitude, ellipsoidalHeight })
+  }
+
+  return {
+    type: 'geo-location',
+    positions: positions,
+  }
+}
+
+const parseRelativePositionsString = (
+  text: string | undefined
+): RelativePositions | undefined => {
+  const numbers = parseAsNumberArray(text)
+  if (numbers === undefined) {
+    return undefined
+  }
+
+  const positions = []
+  const length = Math.floor(numbers.length / 3)
+  for (let i = 0; i < length; i++) {
+    const x = numbers[i * 3]
+    const y = numbers[i * 3 + 1]
+    const z = numbers[i * 3 + 2]
+    positions.push({ x, y, z })
+  }
+
+  return {
+    type: 'relative',
+    positions: positions,
   }
 }
 
@@ -817,6 +879,21 @@ export class PomlParser {
         color: attr['@_color'],
       })
       return line
+    }
+
+    if ('polygon' in geometry) {
+      const attr = geometry[':@'] ?? {}
+
+      const parseVertices =
+        positionType === 'relative'
+          ? parseRelativePositionsString
+          : parseGeoLocationsString
+
+      const polygon = new PolygonGeometry({
+        vertices: parseVertices(attr['@_vertices']),
+        color: attr['@_color'],
+      })
+      return polygon
     }
 
     return undefined

@@ -158,7 +158,7 @@ export interface FxScriptElementAttributes extends FxElementAttributesBase {
 export type FxGeometry = FxLineGeometry | FxPolygonGeometry | FxUnknowGeometry
 
 export function isFxGeometry(obj: FxGeometry | FxElement): obj is FxGeometry {
-  return 'line' in obj
+  return 'line' in obj || 'polygon' in obj
 }
 
 export interface FxUnknowGeometry {
