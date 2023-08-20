@@ -25,6 +25,8 @@ import {
   PomlScreenSpaceElement,
   PomlUnknown,
   MaybePomlElement,
+  RelativePositions,
+  GeoLocations,
 } from '.'
 import {
   FxElement,
@@ -46,6 +48,7 @@ import {
   isFxGeometry,
   FxGeoReferenceElementAttributes,
   FxScriptElementAttributes,
+  FxPolygonGeometry,
 } from './fastXmlParserPomlType'
 
 const parseAsBoolean = (text: string | undefined) => {
@@ -270,6 +273,21 @@ const buildGeoLocationOrRelativeString = (
     }
     case 'relative': {
       return `${p.x} ${p.y} ${p.z}`
+    }
+  }
+}
+
+const buildGeoLocationsOrRelativeString = (
+  p: GeoLocations | RelativePositions
+) => {
+  switch (p.type) {
+    case 'geo-location': {
+      return p.positions
+        .map((p) => `${p.longitude},${p.latitude},${p.ellipsoidalHeight}`)
+        .join(' ')
+    }
+    case 'relative': {
+      return p.positions.map((p) => `${p.x},${p.y},${p.z}`).join(' ')
     }
   }
 }
@@ -1128,6 +1146,16 @@ export class PomlParser {
         const attrs: FxLineGeometry[':@'] = {
           '@_start': buildGeoLocationOrRelativeString(geometry.positions[0]),
           '@_end': buildGeoLocationOrRelativeString(geometry.positions[1]),
+        }
+        this.setAttribute(attrs, '@_color', geometry.color)
+        return {
+          line: [],
+          ':@': attrs,
+        }
+      }
+      case 'polygon': {
+        const attrs: FxPolygonGeometry[':@'] = {
+          '@_vertices': buildGeoLocationsOrRelativeString(geometry.vertices),
         }
         this.setAttribute(attrs, '@_color', geometry.color)
         return {

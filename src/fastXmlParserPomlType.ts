@@ -155,7 +155,7 @@ export interface FxScriptElementAttributes extends FxElementAttributesBase {
   '@_args'?: string
 }
 
-export type FxGeometry = FxLineGeometry | FxUnknowGeometry
+export type FxGeometry = FxLineGeometry | FxPolygonGeometry | FxUnknowGeometry
 
 export function isFxGeometry(obj: FxGeometry | FxElement): obj is FxGeometry {
   return 'line' in obj
@@ -170,6 +170,15 @@ export interface FxLineGeometry {
   ':@'?: {
     '@_start'?: string
     '@_end'?: string
+    '@_color'?: string
+  }
+}
+
+export interface FxPolygonGeometry {
+  polygon: unknown
+  ':@'?: {
+    '@_vertices'?: string
+    '@_indices'?: string
     '@_color'?: string
   }
 }
