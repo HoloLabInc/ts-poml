@@ -235,7 +235,7 @@ describe('parse', () => {
     expect(element.src).toBe('video1')
   })
 
-  test('parse geometry element', () => {
+  test('parse geometry line element', () => {
     const xml = `
     <poml>
       <scene>
@@ -332,6 +332,81 @@ describe('parse', () => {
         ellipsoidalHeight: 18.65,
       })
       expect(line.color).toBe('green')
+    }
+  })
+
+  test('parse geometry polygon element', () => {
+    const xml = `
+    <poml>
+      <scene>
+        <geometry id="geometry0" position-type="relative">
+          <polygon vertices="1,2,3 4,5,6" color="red"/>
+        </geometry>
+        <geometry id="geometry1" position-type="geo-location">
+          <polygon vertices="1,2,3 4,5,6" color="red"/>
+        </geometry>
+      </scene>
+    </poml>
+    `
+
+    const poml = parse(xml)
+    expect(poml.scene.children.length).toBe(2)
+
+    // test element of id="geometry0"
+    const geometry0 = poml.scene.children[0]
+    expect(geometry0.type).toBe('geometry')
+    if (geometry0.type != 'geometry') {
+      throw new Error('failed')
+    }
+    expect(geometry0.geometries.length).toBe(2)
+    {
+      const polygon0 = geometry0.geometries[0]
+      expect(polygon0.type).toBe('polygon')
+      if (polygon0.type != 'polygon') {
+        throw new Error('failed')
+      }
+      expect(polygon0.vertices.positions.length).toBe(2)
+      expect(polygon0.vertices.type).toBe('relative')
+      expect(polygon0.vertices.positions[0]).toStrictEqual({
+        x: 1,
+        y: 2,
+        z: 3,
+      })
+      expect(polygon0.vertices.positions[1]).toStrictEqual({
+        type: 'relative',
+        x: 4,
+        y: 5,
+        z: 6,
+      })
+      expect(polygon0.color).toBe('red')
+    }
+
+    // test element of id="geometry1"
+    const geometry1 = poml.scene.children[1]
+    expect(geometry1.type).toBe('geometry')
+    if (geometry1.type != 'geometry') {
+      throw new Error('failed')
+    }
+    expect(geometry1.geometries.length).toBe(1)
+    {
+      const polygon = geometry1.geometries[0]
+      expect(polygon.type).toBe('polygon')
+      if (polygon.type != 'polygon') {
+        throw new Error('failed')
+      }
+      expect(polygon.vertices.positions.length).toBe(2)
+      expect(polygon.vertices.type).toBe('geo-location')
+      expect(polygon.vertices.positions[0]).toStrictEqual({
+        longitude: 1,
+        latitude: 2,
+        ellipsoidalHeight: 3,
+      })
+      expect(polygon.vertices.positions[1]).toStrictEqual({
+        longitude: 4,
+        latitude: 5,
+        ellipsoidalHeight: 6,
+      })
+      expect(polygon.color).toBe('green')
     }
   })
 
