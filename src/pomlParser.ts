@@ -25,6 +25,9 @@ import {
   PomlScreenSpaceElement,
   PomlUnknown,
   MaybePomlElement,
+  RelativePositions,
+  GeoLocations,
+  PolygonGeometry,
 } from '.'
 import {
   FxElement,
@@ -46,6 +49,7 @@ import {
   isFxGeometry,
   FxGeoReferenceElementAttributes,
   FxScriptElementAttributes,
+  FxPolygonGeometry,
 } from './fastXmlParserPomlType'
 
 const parseAsBoolean = (text: string | undefined) => {
@@ -172,6 +176,32 @@ const parseAsQuaternion = (text: string | undefined) => {
   return undefined
 }
 
+const parseAsNumberArray = (text: string | undefined) => {
+  if (!text) {
+    return undefined
+  }
+
+  const r = /[,\s]+/g
+  const tokens = text.split(r)
+
+  const numbers = tokens
+    .map((x) => Number.parseFloat(x))
+    .filter((x) => !Number.isNaN(x))
+
+  return numbers
+}
+
+const buildNumberArrayString = (
+  numbers: number[] | undefined,
+  separator: string = ' '
+) => {
+  if (numbers === undefined) {
+    return undefined
+  }
+
+  return numbers.join(separator)
+}
+
 const parseAsStringArray = (text: string | undefined): string[] => {
   if (!text) {
     return []
@@ -240,6 +270,52 @@ const parseRelativePositionString = (
   }
 }
 
+const parseGeoLocationsString = (
+  text: string | undefined
+): GeoLocations | undefined => {
+  const numbers = parseAsNumberArray(text)
+  if (numbers === undefined) {
+    return undefined
+  }
+
+  const positions = []
+  const length = Math.floor(numbers.length / 3)
+  for (let i = 0; i < length; i++) {
+    const longitude = numbers[i * 3]
+    const latitude = numbers[i * 3 + 1]
+    const ellipsoidalHeight = numbers[i * 3 + 2]
+    positions.push({ longitude, latitude, ellipsoidalHeight })
+  }
+
+  return {
+    type: 'geo-location',
+    positions: positions,
+  }
+}
+
+const parseRelativePositionsString = (
+  text: string | undefined
+): RelativePositions | undefined => {
+  const numbers = parseAsNumberArray(text)
+  if (numbers === undefined) {
+    return undefined
+  }
+
+  const positions = []
+  const length = Math.floor(numbers.length / 3)
+  for (let i = 0; i < length; i++) {
+    const x = numbers[i * 3]
+    const y = numbers[i * 3 + 1]
+    const z = numbers[i * 3 + 2]
+    positions.push({ x, y, z })
+  }
+
+  return {
+    type: 'relative',
+    positions: positions,
+  }
+}
+
 const parseCustomAttributes = (attributeObjet: object): Map<string, string> => {
   const customAttributes = new Map<string, string>()
   for (const [key, value] of Object.entries(attributeObjet)) {
@@ -270,6 +346,25 @@ const buildGeoLocationOrRelativeString = (
     }
     case 'relative': {
       return `${p.x} ${p.y} ${p.z}`
+    }
+  }
+}
+
+const buildGeoLocationsOrRelativeString = (
+  p: GeoLocations | RelativePositions | undefined
+) => {
+  if (p === undefined) {
+    return undefined
+  }
+
+  switch (p.type) {
+    case 'geo-location': {
+      return p.positions
+        .map((p) => `${p.longitude},${p.latitude},${p.ellipsoidalHeight}`)
+        .join(' ')
+    }
+    case 'relative': {
+      return p.positions.map((p) => `${p.x},${p.y},${p.z}`).join(' ')
     }
   }
 }
@@ -801,6 +896,23 @@ export class PomlParser {
       return line
     }
 
+    if ('polygon' in geometry) {
+      const attr = geometry[':@'] ?? {}
+
+      const parseVertices =
+        positionType === 'relative'
+          ? parseRelativePositionsString
+          : parseGeoLocationsString
+
+      const polygon = new PolygonGeometry({
+        vertices: parseVertices(attr['@_vertices']),
+        indices: parseAsNumberArray(attr['@_indices']),
+        color: attr['@_color'],
+      })
+
+      return polygon
+    }
+
     return undefined
   }
 
@@ -1132,6 +1244,21 @@ export class PomlParser {
         this.setAttribute(attrs, '@_color', geometry.color)
         return {
           line: [],
+          ':@': attrs,
+        }
+      }
+      case 'polygon': {
+        const attrs: FxPolygonGeometry[':@'] = {}
+
+        const vertices = buildGeoLocationsOrRelativeString(geometry.vertices)
+        this.setAttribute(attrs, '@_vertices', vertices)
+
+        const indices = buildNumberArrayString(geometry.indices, ' ')
+        this.setAttribute(attrs, '@_indices', indices)
+
+        this.setAttribute(attrs, '@_color', geometry.color)
+        return {
+          polygon: [],
           ':@': attrs,
         }
       }
