@@ -2,6 +2,7 @@ import {
   LineGeometry,
   MaybePomlElement,
   Meta,
+  PolygonGeometry,
   Poml,
   PomlCesium3dTilesElement,
   PomlEmptyElement,
@@ -1321,6 +1322,42 @@ describe('parse', () => {
             children: [
               new PomlEmptyElement({ id: 'aaa' }),
               new PomlEmptyElement({ id: 'bbb' }),
+            ],
+          }),
+        ],
+      }),
+    },
+    {
+      scene: Poml.scene({
+        children: [
+          new PomlGeometryElement({
+            geometries: [
+              new PolygonGeometry({
+                type: 'polygon',
+                vertices: {
+                  type: 'relative',
+                  positions: [
+                    { x: 1, y: 2, z: 3 },
+                    { x: 4, y: 5, z: 6 },
+                  ],
+                },
+                color: 'blue',
+              }),
+            ],
+          }),
+          new PomlGeometryElement({
+            geometries: [
+              new PolygonGeometry({
+                type: 'polygon',
+                vertices: {
+                  type: 'geo-location',
+                  positions: [
+                    { longitude: 1, latitude: 2, ellipsoidalHeight: 3 },
+                    { longitude: 4, latitude: 5, ellipsoidalHeight: 6 },
+                  ],
+                },
+                color: 'blue',
+              }),
             ],
           }),
         ],

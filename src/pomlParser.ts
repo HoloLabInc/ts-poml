@@ -1241,7 +1241,7 @@ export class PomlParser {
         }
         this.setAttribute(attrs, '@_color', geometry.color)
         return {
-          line: [],
+          polygon: [],
           ':@': attrs,
         }
       }
