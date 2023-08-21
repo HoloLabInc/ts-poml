@@ -340,8 +340,12 @@ const buildGeoLocationOrRelativeString = (
 }
 
 const buildGeoLocationsOrRelativeString = (
-  p: GeoLocations | RelativePositions
+  p: GeoLocations | RelativePositions | undefined
 ) => {
+  if (p === undefined) {
+    return undefined
+  }
+
   switch (p.type) {
     case 'geo-location': {
       return p.positions
@@ -893,6 +897,7 @@ export class PomlParser {
         vertices: parseVertices(attr['@_vertices']),
         color: attr['@_color'],
       })
+
       return polygon
     }
 

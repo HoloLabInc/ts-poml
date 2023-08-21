@@ -308,14 +308,11 @@ export class LineGeometry extends GeometryBase {
 
 export class PolygonGeometry extends GeometryBase {
   type: 'polygon' = 'polygon'
-  vertices: RelativePositions | GeoLocations = {
-    type: 'relative',
-    positions: [],
-  }
+  vertices?: RelativePositions | GeoLocations
   color?: string
 
-  public get positionType(): PolygonGeometry['vertices']['type'] {
-    return this.vertices.type
+  public get positionType(): (RelativePositions | GeoLocation)['type'] {
+    return this.vertices?.type ?? 'relative'
   }
 
   constructor(init: Partial<PolygonGeometry>) {

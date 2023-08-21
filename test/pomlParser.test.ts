@@ -343,7 +343,7 @@ describe('parse', () => {
           <polygon vertices="1,2,3 4,5,6" color="red"/>
         </geometry>
         <geometry id="geometry1" position-type="geo-location">
-          <polygon vertices="1,2,3 4,5,6" color="red"/>
+          <polygon vertices="1,2,3 4,5,6" color="green"/>
         </geometry>
       </scene>
     </poml>
@@ -358,11 +358,14 @@ describe('parse', () => {
     if (geometry0.type != 'geometry') {
       throw new Error('failed')
     }
-    expect(geometry0.geometries.length).toBe(2)
+    expect(geometry0.geometries.length).toBe(1)
     {
       const polygon0 = geometry0.geometries[0]
       expect(polygon0.type).toBe('polygon')
       if (polygon0.type != 'polygon') {
+        throw new Error('failed')
+      }
+      if (polygon0.vertices === undefined) {
         throw new Error('failed')
       }
       expect(polygon0.vertices.positions.length).toBe(2)
@@ -373,7 +376,6 @@ describe('parse', () => {
         z: 3,
       })
       expect(polygon0.vertices.positions[1]).toStrictEqual({
-        type: 'relative',
         x: 4,
         y: 5,
         z: 6,
@@ -392,6 +394,9 @@ describe('parse', () => {
       const polygon = geometry1.geometries[0]
       expect(polygon.type).toBe('polygon')
       if (polygon.type != 'polygon') {
+        throw new Error('failed')
+      }
+      if (polygon.vertices === undefined) {
         throw new Error('failed')
       }
       expect(polygon.vertices.positions.length).toBe(2)
