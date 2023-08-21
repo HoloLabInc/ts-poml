@@ -309,6 +309,7 @@ export class LineGeometry extends GeometryBase {
 export class PolygonGeometry extends GeometryBase {
   type: 'polygon' = 'polygon'
   vertices?: RelativePositions | GeoLocations
+  indices?: number[]
   color?: string
 
   public get positionType(): (RelativePositions | GeoLocation)['type'] {

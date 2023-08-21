@@ -341,10 +341,10 @@ describe('parse', () => {
     <poml>
       <scene>
         <geometry id="geometry0" position-type="relative">
-          <polygon vertices="1,2,3 4,5,6" color="red"/>
+          <polygon vertices="1,2,3 4,5,6" indices="0 1 2" color="red"/>
         </geometry>
         <geometry id="geometry1" position-type="geo-location">
-          <polygon vertices="1,2,3 4,5,6" color="green"/>
+          <polygon vertices="1,2,3 4,5,6" indices="0,2,1" color="green"/>
         </geometry>
       </scene>
     </poml>
@@ -381,6 +381,7 @@ describe('parse', () => {
         y: 5,
         z: 6,
       })
+      expect(polygon0.indices).toEqual([0, 1, 2])
       expect(polygon0.color).toBe('red')
     }
 
@@ -412,6 +413,7 @@ describe('parse', () => {
         latitude: 5,
         ellipsoidalHeight: 6,
       })
+      expect(polygon.indices).toEqual([0, 2, 1])
       expect(polygon.color).toBe('green')
     }
   })
@@ -1341,6 +1343,7 @@ describe('parse', () => {
                     { x: 4, y: 5, z: 6 },
                   ],
                 },
+                indices: [0, 1, 2],
                 color: 'blue',
               }),
             ],

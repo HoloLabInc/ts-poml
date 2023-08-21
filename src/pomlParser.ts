@@ -191,6 +191,17 @@ const parseAsNumberArray = (text: string | undefined) => {
   return numbers
 }
 
+const buildNumberArrayString = (
+  numbers: number[] | undefined,
+  separator: string = ' '
+) => {
+  if (numbers === undefined) {
+    return undefined
+  }
+
+  return numbers.join(separator)
+}
+
 const parseAsStringArray = (text: string | undefined): string[] => {
   if (!text) {
     return []
@@ -895,6 +906,7 @@ export class PomlParser {
 
       const polygon = new PolygonGeometry({
         vertices: parseVertices(attr['@_vertices']),
+        indices: parseAsNumberArray(attr['@_indices']),
         color: attr['@_color'],
       })
 
@@ -1236,9 +1248,14 @@ export class PomlParser {
         }
       }
       case 'polygon': {
-        const attrs: FxPolygonGeometry[':@'] = {
-          '@_vertices': buildGeoLocationsOrRelativeString(geometry.vertices),
-        }
+        const attrs: FxPolygonGeometry[':@'] = {}
+
+        const vertices = buildGeoLocationsOrRelativeString(geometry.vertices)
+        this.setAttribute(attrs, '@_vertices', vertices)
+
+        const indices = buildNumberArrayString(geometry.indices, ' ')
+        this.setAttribute(attrs, '@_indices', indices)
+
         this.setAttribute(attrs, '@_color', geometry.color)
         return {
           polygon: [],
