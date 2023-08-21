@@ -823,12 +823,9 @@ describe('parse', () => {
     const xml = `
 <poml>
   <scene>
-    <space-reference abcde="12345">
-    </space-reference>
-    <element unsupported-attr="test">
-    </element>
-    <script src="test.wasm" unsupported-attr="xyz">
-    </script>
+    <space-reference abcde="12345"></space-reference>
+    <element unsupported-attr="test"></element>
+    <script src="test.wasm" unsupported-attr="xyz"></script>
   </scene>
 </poml>
 `
