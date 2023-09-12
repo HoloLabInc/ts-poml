@@ -52,6 +52,7 @@ import {
   FxScriptElementAttributes,
   FxPolygonGeometry,
 } from './fastXmlParserPomlType'
+import { parseAsNumberArray } from './parserUtility'
 
 const parseAsBoolean = (text: string | undefined) => {
   if (!text) {
@@ -177,6 +178,7 @@ const parseAsQuaternion = (text: string | undefined) => {
   return undefined
 }
 
+/*
 const parseAsNumberArray = (text: string | undefined) => {
   if (!text) {
     return undefined
@@ -191,6 +193,7 @@ const parseAsNumberArray = (text: string | undefined) => {
 
   return numbers
 }
+*/
 
 const buildNumberArrayString = (
   numbers: number[] | undefined,
@@ -273,6 +276,7 @@ const parseRelativePositionString = (
 }
 */
 
+/*
 const parseGeoLocationsString = (
   text: string | undefined
 ): GeodeticPositions | undefined => {
@@ -318,6 +322,7 @@ const parseRelativePositionsString = (
     positions: positions,
   }
 }
+*/
 
 const parseCustomAttributes = (attributeObjet: object): Map<string, string> => {
   const customAttributes = new Map<string, string>()
@@ -751,7 +756,7 @@ export class PomlParser {
 
     // geometry tag
     if ('geometry' in fxElement) {
-      const attr = fxElement[':@'] ?? {}
+      // const attr = fxElement[':@'] ?? {}
       /*
       const positionType = (() => {
         const positionTypeStr = attr['@_position-type']
