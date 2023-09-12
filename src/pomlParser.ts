@@ -1,6 +1,6 @@
 import { XMLBuilder, XMLParser } from 'fast-xml-parser'
 import {
-  GeoLocation,
+  // GeoLocation,
   PomlGeometry,
   LineGeometry,
   CoordinateReference,
@@ -14,7 +14,7 @@ import {
   PomlVideoElement,
   PomlCesium3dTilesElement,
   Position,
-  RelativePosition,
+  // RelativePosition,
   Rotation,
   Scale,
   Scene,
@@ -26,8 +26,9 @@ import {
   PomlUnknown,
   MaybePomlElement,
   RelativePositions,
-  GeoLocations,
+  GeodeticPositions,
   PolygonGeometry,
+  GeometryPositions,
 } from '.'
 import {
   FxElement,
@@ -242,6 +243,7 @@ const buildRotationString = (rotation: Rotation | undefined) => {
   return `${rotation.x} ${rotation.y} ${rotation.z} ${rotation.w}`
 }
 
+/*
 const parseGeoLocationString = (
   text: string | undefined
 ): GeoLocation | undefined => {
@@ -269,10 +271,11 @@ const parseRelativePositionString = (
     ...p,
   }
 }
+*/
 
 const parseGeoLocationsString = (
   text: string | undefined
-): GeoLocations | undefined => {
+): GeodeticPositions | undefined => {
   const numbers = parseAsNumberArray(text)
   if (numbers === undefined) {
     return undefined
@@ -288,7 +291,7 @@ const parseGeoLocationsString = (
   }
 
   return {
-    type: 'geo-location',
+    type: 'geodetic',
     positions: positions,
   }
 }
@@ -337,11 +340,12 @@ const buildOriginalAttributes = (
     : {}
 }
 
+/*
 const buildGeoLocationOrRelativeString = (
   p: GeoLocation | RelativePosition
 ) => {
   switch (p.type) {
-    case 'geo-location': {
+    case 'geolocation': {
       return `${p.latitude} ${p.longitude} ${p.ellipsoidalHeight}`
     }
     case 'relative': {
@@ -349,19 +353,26 @@ const buildGeoLocationOrRelativeString = (
     }
   }
 }
+*/
 
 const buildGeoLocationsOrRelativeString = (
-  p: GeoLocations | RelativePositions | undefined
-) => {
+  // p: GeodeticPositions | RelativePositions | undefined
+  p: GeometryPositions | undefined
+): string | undefined => {
   if (p === undefined) {
     return undefined
   }
 
+  if (typeof p === 'string') {
+    return p
+  }
+
   switch (p.type) {
-    case 'geo-location': {
-      return p.positions
+    case 'geodetic': {
+      const positionString = p.positions
         .map((p) => `${p.longitude},${p.latitude},${p.ellipsoidalHeight}`)
         .join(' ')
+      return `geodetic: ${positionString}`
     }
     case 'relative': {
       return p.positions.map((p) => `${p.x},${p.y},${p.z}`).join(' ')
@@ -741,6 +752,7 @@ export class PomlParser {
     // geometry tag
     if ('geometry' in fxElement) {
       const attr = fxElement[':@'] ?? {}
+      /*
       const positionType = (() => {
         const positionTypeStr = attr['@_position-type']
         switch (positionTypeStr) {
@@ -753,12 +765,14 @@ export class PomlParser {
           }
         }
       })()
+      */
 
       const geometries: PomlGeometry[] = []
       const fxChildren: FxElement[] = []
       fxElement.geometry.forEach((fxChild) => {
         if (isFxGeometry(fxChild)) {
-          const g = this.fxGeometryToGeometry(fxChild, positionType)
+          // const g = this.fxGeometryToGeometry(fxChild, positionType)
+          const g = this.fxGeometryToGeometry(fxChild)
           if (g) {
             geometries.push(g)
           }
@@ -856,11 +870,12 @@ export class PomlParser {
   }
 
   private fxGeometryToGeometry(
-    geometry: FxGeometry,
-    positionType: 'relative' | 'geo-location'
+    geometry: FxGeometry
+    // positionType: 'relative' | 'geo-location'
   ): PomlGeometry | undefined {
     if ('line' in geometry) {
       const attr = geometry[':@'] ?? {}
+      /*
       const defaultRelative = () => {
         return {
           type: 'relative' as const,
@@ -877,6 +892,8 @@ export class PomlParser {
           ellipsoidalHeight: 0,
         }
       }
+      */
+      /*
       const parsePositions =
         positionType === 'relative'
           ? (s?: string, e?: string) =>
@@ -889,8 +906,10 @@ export class PomlParser {
                 parseGeoLocationString(s) ?? defaultGeoLocation(),
                 parseGeoLocationString(e) ?? defaultGeoLocation(),
               ] as const
+      */
       const line = new LineGeometry({
-        positions: parsePositions(attr['@_start'], attr['@_end']),
+        // positions: parsePositions(attr['@_start'], attr['@_end']),
+        vertices: attr['@_vertices'],
         color: attr['@_color'],
       })
       return line
@@ -899,13 +918,16 @@ export class PomlParser {
     if ('polygon' in geometry) {
       const attr = geometry[':@'] ?? {}
 
+      /*
       const parseVertices =
         positionType === 'relative'
           ? parseRelativePositionsString
           : parseGeoLocationsString
+          */
 
       const polygon = new PolygonGeometry({
-        vertices: parseVertices(attr['@_vertices']),
+        vertices: attr['@_vertices'],
+        // vertices: parseVertices(attr['@_vertices']),
         indices: parseAsNumberArray(attr['@_indices']),
         color: attr['@_color'],
       })
@@ -1158,8 +1180,8 @@ export class PomlParser {
         ...originalAttrs,
         ...commonAttributes,
       }
-      const positionType = pomlElement.geometries[0].positionType
-      this.setAttribute(geometryAttributes, '@_position-type', positionType)
+      // const positionType = pomlElement.geometries[0].positionType
+      // this.setAttribute(geometryAttributes, '@_position-type', positionType)
       const geometries: FxGeometry[] = []
       pomlElement.geometries.forEach((g) => {
         const fxGeometry = this.buildGeometry(g)
@@ -1237,10 +1259,15 @@ export class PomlParser {
   private buildGeometry(geometry: PomlGeometry): FxGeometry | undefined {
     switch (geometry.type) {
       case 'line': {
+        /*
         const attrs: FxLineGeometry[':@'] = {
           '@_start': buildGeoLocationOrRelativeString(geometry.positions[0]),
           '@_end': buildGeoLocationOrRelativeString(geometry.positions[1]),
         }
+        */
+        const vertices = buildGeoLocationsOrRelativeString(geometry.vertices)
+        this.setAttribute(attrs, '@_vertices', vertices)
+
         this.setAttribute(attrs, '@_color', geometry.color)
         return {
           line: [],

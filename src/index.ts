@@ -263,58 +263,73 @@ export abstract class GeometryBase {
 
 export type PomlGeometry = LineGeometry | PolygonGeometry
 
+/*
 export type GeoLocation = {
   type: 'geo-location'
   latitude: number
   longitude: number
   ellipsoidalHeight: number
 }
+*/
 
-export type GeoLocations = {
-  type: 'geo-location'
-  positions: {
-    latitude: number
-    longitude: number
-    ellipsoidalHeight: number
-  }[]
-}
+export type GeometryPositions = string | RelativePositions | GeodeticPositions
 
-export type RelativePosition = Position & { type: 'relative' }
+// export type RelativePosition = Position & { type: 'relative' }
 export type RelativePositions = {
   type: 'relative'
   positions: Position[]
 }
 
+export type GeodeticPositions = {
+  type: 'geodetic'
+  positions: {
+    longitude: number
+    latitude: number
+    ellipsoidalHeight: number
+  }[]
+}
+
 export class LineGeometry extends GeometryBase {
   type: 'line' = 'line'
+  vertices?: GeometryPositions
+  /*
   positions:
     | readonly [RelativePosition, RelativePosition]
     | readonly [GeoLocation, GeoLocation]
+    */
   color?: string
+  /*
   public get positionType(): LineGeometry['positions'][0]['type'] {
     return this.positions[0].type
   }
+  */
 
   constructor(
-    init: Partial<LineGeometry> & { positions: LineGeometry['positions'] }
+    init: Partial<LineGeometry>
+    //init: Partial<LineGeometry> & { positions: LineGeometry['positions'] }
   ) {
     super(init)
+    /*
     this.positions ??= [
       { type: 'relative', x: 0, y: 0, z: 0 },
       { type: 'relative', x: 0, y: 0, z: 0 },
     ]
+    */
   }
 }
 
 export class PolygonGeometry extends GeometryBase {
   type: 'polygon' = 'polygon'
-  vertices?: RelativePositions | GeoLocations
+  // vertices?: RelativePositions | GeodeticPositions
+  vertices?: GeometryPositions
   indices?: number[]
   color?: string
 
+  /*
   public get positionType(): (RelativePositions | GeoLocation)['type'] {
     return this.vertices?.type ?? 'relative'
   }
+  */
 
   constructor(init: Partial<PolygonGeometry>) {
     super(init)

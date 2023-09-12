@@ -66,7 +66,7 @@ export interface FxModelElementAttributes extends FxElementAttributesBase {
 }
 
 export interface FxGeometryElementAttributes extends FxElementAttributesBase {
-  '@_position-type'?: string
+  // '@_position-type'?: string
 }
 
 export interface FxTextElement {
@@ -168,8 +168,9 @@ export interface FxUnknowGeometry {
 export interface FxLineGeometry {
   line: unknown
   ':@'?: {
-    '@_start'?: string
-    '@_end'?: string
+    // '@_start'?: string
+    // '@_end'?: string
+    '@_vertices'?: string
     '@_color'?: string
   }
 }
