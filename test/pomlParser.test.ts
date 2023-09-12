@@ -240,14 +240,13 @@ describe('parse', () => {
     const xml = `
     <poml>
       <scene>
-        <geometry id="geometry0" position-type="relative">
-          <line start="1,2,3" end="4,5,6" color="red"/>
-          <line start="7,8,9" end="10,11,12"/>
+        <geometry id="geometry0">
+          <line vertices="1,2,3 4,5,6" color="red"/>
+          <line vertices="7,8,9 10,11,12"/>
         </geometry>
-        <geometry id="geometry1" position-type="geo-location">
+        <geometry id="geometry1">
           <line
-            start="34.630549,135.0341387,18.65"
-            end="34.6021554,135.0094035,18.65"
+            vertices="geodetic: 34.630549,135.0341387,18.65 34.6021554,135.0094035,18.65"
             color="green"/>
         </geometry>
       </scene>
@@ -340,11 +339,11 @@ describe('parse', () => {
     const xml = `
     <poml>
       <scene>
-        <geometry id="geometry0" position-type="relative">
+        <geometry id="geometry0">
           <polygon vertices="1,2,3 4,5,6" indices="0 1 2" color="red"/>
         </geometry>
-        <geometry id="geometry1" position-type="geo-location">
-          <polygon vertices="1,2,3 4,5,6" indices="0,2,1" color="green"/>
+        <geometry id="geometry1">
+          <polygon vertices="geodetic: 1,2,3 4,5,6" indices="0,2,1" color="green"/>
         </geometry>
       </scene>
     </poml>
@@ -422,11 +421,11 @@ describe('parse', () => {
     const xml = `
     <poml>
       <scene>
-        <geometry position-type="relative">
+        <geometry>
           <geo-placement
             id="placement-0" latitude="1"
             longitude="2" ellipsoidal-height="3"/>
-          <line start="1,2,3" end="4,5,6"/>
+          <line vertices="1,2,3 4,5,6"/>
           <element id="child-of-geometry"/>
         </geometry>
       </scene>
