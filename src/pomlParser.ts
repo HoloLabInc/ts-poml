@@ -1265,6 +1265,8 @@ export class PomlParser {
           '@_end': buildGeoLocationOrRelativeString(geometry.positions[1]),
         }
         */
+        const attrs: FxLineGeometry[':@'] = {}
+
         const vertices = buildGeoLocationsOrRelativeString(geometry.vertices)
         this.setAttribute(attrs, '@_vertices', vertices)
 

@@ -1313,14 +1313,7 @@ describe('parse', () => {
             geometries: [
               new LineGeometry({
                 type: 'line',
-                vertices: {
-                  type: 'relative',
-                  positions: [
-                    { x: 1, y: 2, z: 3 },
-                    { x: 4, y: 5, z: 6 },
-                    { x: -0.5, y: 7.5, z: 10 },
-                  ],
-                },
+                vertices: "1,2,3 4,5,6 -0.5 7.5 10",
                 color: 'blue',
               }),
             ],
@@ -1339,13 +1332,7 @@ describe('parse', () => {
             geometries: [
               new PolygonGeometry({
                 type: 'polygon',
-                vertices: {
-                  type: 'relative',
-                  positions: [
-                    { x: 1, y: 2, z: 3 },
-                    { x: 4, y: 5, z: 6 },
-                  ],
-                },
+                vertices: "1,2,3 4,5,6",
                 indices: [0, 1, 2],
                 color: 'blue',
               }),
@@ -1355,13 +1342,7 @@ describe('parse', () => {
             geometries: [
               new PolygonGeometry({
                 type: 'polygon',
-                vertices: {
-                  type: 'geodetic',
-                  positions: [
-                    { longitude: 1, latitude: 2, ellipsoidalHeight: 3 },
-                    { longitude: 4, latitude: 5, ellipsoidalHeight: 6 },
-                  ],
-                },
+                vertices: "geodetic: 1,2,3 4,5,6",
                 color: 'blue',
               }),
             ],
