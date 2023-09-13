@@ -48,9 +48,9 @@ describe('parseGeometryPositionsString', () => {
     ])
   })
 
-  test('spaces are ignored', () => {
+  test('spaces and commas are ignored', () => {
     const result = parseGeometryPositionsString(
-      '  relative   :   1.5 ,  -2, 3   4,5,6'
+      '  relative   :   1.5 ,  -2, 3   4,5,,,,6,,,,'
     )
     expect(result?.type).toBe('relative')
 
@@ -62,5 +62,16 @@ describe('parseGeometryPositionsString', () => {
       { x: 1.5, y: -2, z: 3 },
       { x: 4, y: 5, z: 6 },
     ])
+  })
+
+  test('numbers after invalid charactors are ignored', () => {
+    const result = parseGeometryPositionsString('relative: 1.5,-2,3,a,4,5,6')
+    expect(result?.type).toBe('relative')
+
+    if (result?.type !== 'relative') {
+      throw new Error('result?.type is not relative')
+    }
+
+    expect(result?.positions).toEqual([{ x: 1.5, y: -2, z: 3 }])
   })
 })

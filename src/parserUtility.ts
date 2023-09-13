@@ -1,7 +1,7 @@
 const splitArrayRegex = /[,\s]+/g
 
 const splitArrayString = (text: string): string[] => {
-  return text.split(splitArrayRegex)
+  return text.split(splitArrayRegex).filter((x) => x !== '')
 }
 
 export const parseAsNumberArray = (
@@ -13,9 +13,14 @@ export const parseAsNumberArray = (
 
   const tokens = splitArrayString(text)
 
-  const numbers = tokens
-    .map((x) => Number.parseFloat(x))
-    .filter((x) => !Number.isNaN(x))
+  const numbers = []
+  for (let i = 0; i < tokens.length; i++) {
+    const num = Number(tokens[i])
+    if (Number.isNaN(num)) {
+      break
+    }
+    numbers.push(num)
+  }
 
   return numbers
 }
