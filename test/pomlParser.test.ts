@@ -240,14 +240,13 @@ describe('parse', () => {
     const xml = `
     <poml>
       <scene>
-        <geometry id="geometry0" position-type="relative">
-          <line start="1,2,3" end="4,5,6" color="red"/>
-          <line start="7,8,9" end="10,11,12"/>
+        <geometry id="geometry0">
+          <line vertices="1,2,3 4,5,6" color="red"/>
+          <line vertices="7,8,9 10,11,12"/>
         </geometry>
-        <geometry id="geometry1" position-type="geo-location">
+        <geometry id="geometry1">
           <line
-            start="34.630549,135.0341387,18.65"
-            end="34.6021554,135.0094035,18.65"
+            vertices="geodetic: 34.630549,135.0341387,18.65 34.6021554,135.0094035,18.65"
             color="green"/>
         </geometry>
       </scene>
@@ -270,19 +269,7 @@ describe('parse', () => {
       if (line0.type != 'line') {
         throw new Error('failed')
       }
-      expect(line0.positions.length).toBe(2)
-      expect(line0.positions[0]).toStrictEqual({
-        type: 'relative',
-        x: 1,
-        y: 2,
-        z: 3,
-      })
-      expect(line0.positions[1]).toStrictEqual({
-        type: 'relative',
-        x: 4,
-        y: 5,
-        z: 6,
-      })
+      expect(line0.vertices).toBe('1,2,3 4,5,6')
       expect(line0.color).toBe('red')
 
       const line1 = geometry0.geometries[1]
@@ -290,19 +277,7 @@ describe('parse', () => {
       if (line1.type != 'line') {
         throw new Error('failed')
       }
-      expect(line1.positions.length).toBe(2)
-      expect(line1.positions[0]).toStrictEqual({
-        type: 'relative',
-        x: 7,
-        y: 8,
-        z: 9,
-      })
-      expect(line1.positions[1]).toStrictEqual({
-        type: 'relative',
-        x: 10,
-        y: 11,
-        z: 12,
-      })
+      expect(line1.vertices).toBe('7,8,9 10,11,12')
       expect(line1.color).toBe(undefined)
     }
 
@@ -319,19 +294,9 @@ describe('parse', () => {
       if (line.type != 'line') {
         throw new Error('failed')
       }
-      expect(line.positions.length).toBe(2)
-      expect(line.positions[0]).toStrictEqual({
-        type: 'geo-location',
-        latitude: 34.630549,
-        longitude: 135.0341387,
-        ellipsoidalHeight: 18.65,
-      })
-      expect(line.positions[1]).toStrictEqual({
-        type: 'geo-location',
-        latitude: 34.6021554,
-        longitude: 135.0094035,
-        ellipsoidalHeight: 18.65,
-      })
+      expect(line.vertices).toBe(
+        'geodetic: 34.630549,135.0341387,18.65 34.6021554,135.0094035,18.65'
+      )
       expect(line.color).toBe('green')
     }
   })
@@ -340,11 +305,11 @@ describe('parse', () => {
     const xml = `
     <poml>
       <scene>
-        <geometry id="geometry0" position-type="relative">
+        <geometry id="geometry0">
           <polygon vertices="1,2,3 4,5,6" indices="0 1 2" color="red"/>
         </geometry>
-        <geometry id="geometry1" position-type="geo-location">
-          <polygon vertices="1,2,3 4,5,6" indices="0,2,1" color="green"/>
+        <geometry id="geometry1">
+          <polygon vertices="geodetic: 1,2,3 4,5,6" indices="0,2,1" color="green"/>
         </geometry>
       </scene>
     </poml>
@@ -369,19 +334,8 @@ describe('parse', () => {
       if (polygon0.vertices === undefined) {
         throw new Error('failed')
       }
-      expect(polygon0.vertices.positions.length).toBe(2)
-      expect(polygon0.vertices.type).toBe('relative')
-      expect(polygon0.vertices.positions[0]).toStrictEqual({
-        x: 1,
-        y: 2,
-        z: 3,
-      })
-      expect(polygon0.vertices.positions[1]).toStrictEqual({
-        x: 4,
-        y: 5,
-        z: 6,
-      })
-      expect(polygon0.indices).toEqual([0, 1, 2])
+      expect(polygon0.vertices).toBe('1,2,3 4,5,6')
+      expect(polygon0.indices).toBe('0 1 2')
       expect(polygon0.color).toBe('red')
     }
 
@@ -401,19 +355,9 @@ describe('parse', () => {
       if (polygon.vertices === undefined) {
         throw new Error('failed')
       }
-      expect(polygon.vertices.positions.length).toBe(2)
-      expect(polygon.vertices.type).toBe('geo-location')
-      expect(polygon.vertices.positions[0]).toStrictEqual({
-        longitude: 1,
-        latitude: 2,
-        ellipsoidalHeight: 3,
-      })
-      expect(polygon.vertices.positions[1]).toStrictEqual({
-        longitude: 4,
-        latitude: 5,
-        ellipsoidalHeight: 6,
-      })
-      expect(polygon.indices).toEqual([0, 2, 1])
+
+      expect(polygon.vertices).toBe('geodetic: 1,2,3 4,5,6')
+      expect(polygon.indices).toBe('0,2,1')
       expect(polygon.color).toBe('green')
     }
   })
@@ -422,11 +366,11 @@ describe('parse', () => {
     const xml = `
     <poml>
       <scene>
-        <geometry position-type="relative">
+        <geometry>
           <geo-placement
             id="placement-0" latitude="1"
             longitude="2" ellipsoidal-height="3"/>
-          <line start="1,2,3" end="4,5,6"/>
+          <line vertices="1,2,3 4,5,6"/>
           <element id="child-of-geometry"/>
         </geometry>
       </scene>
@@ -1311,10 +1255,7 @@ describe('parse', () => {
             geometries: [
               new LineGeometry({
                 type: 'line',
-                positions: [
-                  { type: 'relative', x: 1, y: 2, z: 3 },
-                  { type: 'relative', x: 4, y: 5, z: 6 },
-                ],
+                vertices: '1,2,3 4,5,6 -0.5 7.5 10',
                 color: 'blue',
               }),
             ],
@@ -1333,14 +1274,8 @@ describe('parse', () => {
             geometries: [
               new PolygonGeometry({
                 type: 'polygon',
-                vertices: {
-                  type: 'relative',
-                  positions: [
-                    { x: 1, y: 2, z: 3 },
-                    { x: 4, y: 5, z: 6 },
-                  ],
-                },
-                indices: [0, 1, 2],
+                vertices: '1,2,3 4,5,6',
+                indices: '0, 1, 2',
                 color: 'blue',
               }),
             ],
@@ -1349,13 +1284,7 @@ describe('parse', () => {
             geometries: [
               new PolygonGeometry({
                 type: 'polygon',
-                vertices: {
-                  type: 'geo-location',
-                  positions: [
-                    { longitude: 1, latitude: 2, ellipsoidalHeight: 3 },
-                    { longitude: 4, latitude: 5, ellipsoidalHeight: 6 },
-                  ],
-                },
+                vertices: 'geodetic: 1,2,3 4,5,6',
                 color: 'blue',
               }),
             ],

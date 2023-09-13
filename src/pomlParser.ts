@@ -1,6 +1,5 @@
 import { XMLBuilder, XMLParser } from 'fast-xml-parser'
 import {
-  GeoLocation,
   PomlGeometry,
   LineGeometry,
   CoordinateReference,
@@ -14,7 +13,6 @@ import {
   PomlVideoElement,
   PomlCesium3dTilesElement,
   Position,
-  RelativePosition,
   Rotation,
   Scale,
   Scene,
@@ -25,9 +23,9 @@ import {
   PomlScreenSpaceElement,
   PomlUnknown,
   MaybePomlElement,
-  RelativePositions,
-  GeoLocations,
   PolygonGeometry,
+  GeometryPositions,
+  GeometryIndices,
 } from '.'
 import {
   FxElement,
@@ -176,32 +174,6 @@ const parseAsQuaternion = (text: string | undefined) => {
   return undefined
 }
 
-const parseAsNumberArray = (text: string | undefined) => {
-  if (!text) {
-    return undefined
-  }
-
-  const r = /[,\s]+/g
-  const tokens = text.split(r)
-
-  const numbers = tokens
-    .map((x) => Number.parseFloat(x))
-    .filter((x) => !Number.isNaN(x))
-
-  return numbers
-}
-
-const buildNumberArrayString = (
-  numbers: number[] | undefined,
-  separator: string = ' '
-) => {
-  if (numbers === undefined) {
-    return undefined
-  }
-
-  return numbers.join(separator)
-}
-
 const parseAsStringArray = (text: string | undefined): string[] => {
   if (!text) {
     return []
@@ -242,80 +214,6 @@ const buildRotationString = (rotation: Rotation | undefined) => {
   return `${rotation.x} ${rotation.y} ${rotation.z} ${rotation.w}`
 }
 
-const parseGeoLocationString = (
-  text: string | undefined
-): GeoLocation | undefined => {
-  const vec = parseAsVector3(text)
-  if (vec === undefined) {
-    return undefined
-  }
-  return {
-    type: 'geo-location',
-    latitude: vec.x,
-    longitude: vec.y,
-    ellipsoidalHeight: vec.z,
-  }
-}
-
-const parseRelativePositionString = (
-  text: string | undefined
-): RelativePosition | undefined => {
-  const p = parsePositionString(text)
-  if (p === undefined) {
-    return undefined
-  }
-  return {
-    type: 'relative',
-    ...p,
-  }
-}
-
-const parseGeoLocationsString = (
-  text: string | undefined
-): GeoLocations | undefined => {
-  const numbers = parseAsNumberArray(text)
-  if (numbers === undefined) {
-    return undefined
-  }
-
-  const positions = []
-  const length = Math.floor(numbers.length / 3)
-  for (let i = 0; i < length; i++) {
-    const longitude = numbers[i * 3]
-    const latitude = numbers[i * 3 + 1]
-    const ellipsoidalHeight = numbers[i * 3 + 2]
-    positions.push({ longitude, latitude, ellipsoidalHeight })
-  }
-
-  return {
-    type: 'geo-location',
-    positions: positions,
-  }
-}
-
-const parseRelativePositionsString = (
-  text: string | undefined
-): RelativePositions | undefined => {
-  const numbers = parseAsNumberArray(text)
-  if (numbers === undefined) {
-    return undefined
-  }
-
-  const positions = []
-  const length = Math.floor(numbers.length / 3)
-  for (let i = 0; i < length; i++) {
-    const x = numbers[i * 3]
-    const y = numbers[i * 3 + 1]
-    const z = numbers[i * 3 + 2]
-    positions.push({ x, y, z })
-  }
-
-  return {
-    type: 'relative',
-    positions: positions,
-  }
-}
-
 const parseCustomAttributes = (attributeObjet: object): Map<string, string> => {
   const customAttributes = new Map<string, string>()
   for (const [key, value] of Object.entries(attributeObjet)) {
@@ -337,36 +235,42 @@ const buildOriginalAttributes = (
     : {}
 }
 
-const buildGeoLocationOrRelativeString = (
-  p: GeoLocation | RelativePosition
-) => {
-  switch (p.type) {
-    case 'geo-location': {
-      return `${p.latitude} ${p.longitude} ${p.ellipsoidalHeight}`
-    }
-    case 'relative': {
-      return `${p.x} ${p.y} ${p.z}`
-    }
-  }
-}
-
-const buildGeoLocationsOrRelativeString = (
-  p: GeoLocations | RelativePositions | undefined
-) => {
+const buildGeometryPositionsString = (
+  p: GeometryPositions | undefined
+): string | undefined => {
   if (p === undefined) {
     return undefined
   }
 
+  if (typeof p === 'string') {
+    return p
+  }
+
   switch (p.type) {
-    case 'geo-location': {
-      return p.positions
+    case 'geodetic': {
+      const positionString = p.positions
         .map((p) => `${p.longitude},${p.latitude},${p.ellipsoidalHeight}`)
         .join(' ')
+      return `geodetic: ${positionString}`
     }
     case 'relative': {
       return p.positions.map((p) => `${p.x},${p.y},${p.z}`).join(' ')
     }
   }
+}
+
+const buildGeometryIndicesString = (
+  indicies: GeometryIndices | undefined
+): string | undefined => {
+  if (indicies === undefined) {
+    return undefined
+  }
+
+  if (typeof indicies === 'string') {
+    return indicies
+  }
+
+  return indicies.join(' ')
 }
 
 const buildArgsString = (args: string[]) => {
@@ -740,25 +644,11 @@ export class PomlParser {
 
     // geometry tag
     if ('geometry' in fxElement) {
-      const attr = fxElement[':@'] ?? {}
-      const positionType = (() => {
-        const positionTypeStr = attr['@_position-type']
-        switch (positionTypeStr) {
-          case 'relative':
-          case 'geo-location': {
-            return positionTypeStr
-          }
-          default: {
-            return 'relative'
-          }
-        }
-      })()
-
       const geometries: PomlGeometry[] = []
       const fxChildren: FxElement[] = []
       fxElement.geometry.forEach((fxChild) => {
         if (isFxGeometry(fxChild)) {
-          const g = this.fxGeometryToGeometry(fxChild, positionType)
+          const g = this.fxGeometryToGeometry(fxChild)
           if (g) {
             geometries.push(g)
           }
@@ -855,42 +745,11 @@ export class PomlParser {
     return new PomlUnknown(fxElement)
   }
 
-  private fxGeometryToGeometry(
-    geometry: FxGeometry,
-    positionType: 'relative' | 'geo-location'
-  ): PomlGeometry | undefined {
+  private fxGeometryToGeometry(geometry: FxGeometry): PomlGeometry | undefined {
     if ('line' in geometry) {
       const attr = geometry[':@'] ?? {}
-      const defaultRelative = () => {
-        return {
-          type: 'relative' as const,
-          x: 0,
-          y: 0,
-          z: 0,
-        }
-      }
-      const defaultGeoLocation = () => {
-        return {
-          type: 'geo-location' as const,
-          latitude: 0,
-          longitude: 0,
-          ellipsoidalHeight: 0,
-        }
-      }
-      const parsePositions =
-        positionType === 'relative'
-          ? (s?: string, e?: string) =>
-              [
-                parseRelativePositionString(s) ?? defaultRelative(),
-                parseRelativePositionString(e) ?? defaultRelative(),
-              ] as const
-          : (s?: string, e?: string) =>
-              [
-                parseGeoLocationString(s) ?? defaultGeoLocation(),
-                parseGeoLocationString(e) ?? defaultGeoLocation(),
-              ] as const
       const line = new LineGeometry({
-        positions: parsePositions(attr['@_start'], attr['@_end']),
+        vertices: attr['@_vertices'],
         color: attr['@_color'],
       })
       return line
@@ -898,15 +757,9 @@ export class PomlParser {
 
     if ('polygon' in geometry) {
       const attr = geometry[':@'] ?? {}
-
-      const parseVertices =
-        positionType === 'relative'
-          ? parseRelativePositionsString
-          : parseGeoLocationsString
-
       const polygon = new PolygonGeometry({
-        vertices: parseVertices(attr['@_vertices']),
-        indices: parseAsNumberArray(attr['@_indices']),
+        vertices: attr['@_vertices'],
+        indices: attr['@_indices'],
         color: attr['@_color'],
       })
 
@@ -1158,8 +1011,6 @@ export class PomlParser {
         ...originalAttrs,
         ...commonAttributes,
       }
-      const positionType = pomlElement.geometries[0].positionType
-      this.setAttribute(geometryAttributes, '@_position-type', positionType)
       const geometries: FxGeometry[] = []
       pomlElement.geometries.forEach((g) => {
         const fxGeometry = this.buildGeometry(g)
@@ -1237,10 +1088,11 @@ export class PomlParser {
   private buildGeometry(geometry: PomlGeometry): FxGeometry | undefined {
     switch (geometry.type) {
       case 'line': {
-        const attrs: FxLineGeometry[':@'] = {
-          '@_start': buildGeoLocationOrRelativeString(geometry.positions[0]),
-          '@_end': buildGeoLocationOrRelativeString(geometry.positions[1]),
-        }
+        const attrs: FxLineGeometry[':@'] = {}
+
+        const vertices = buildGeometryPositionsString(geometry.vertices)
+        this.setAttribute(attrs, '@_vertices', vertices)
+
         this.setAttribute(attrs, '@_color', geometry.color)
         return {
           line: [],
@@ -1250,10 +1102,10 @@ export class PomlParser {
       case 'polygon': {
         const attrs: FxPolygonGeometry[':@'] = {}
 
-        const vertices = buildGeoLocationsOrRelativeString(geometry.vertices)
+        const vertices = buildGeometryPositionsString(geometry.vertices)
         this.setAttribute(attrs, '@_vertices', vertices)
 
-        const indices = buildNumberArrayString(geometry.indices, ' ')
+        const indices = buildGeometryIndicesString(geometry.indices)
         this.setAttribute(attrs, '@_indices', indices)
 
         this.setAttribute(attrs, '@_color', geometry.color)
