@@ -1,5 +1,7 @@
 import { FxUnknownElement } from './fastXmlParserPomlType'
 
+export { parseGeometryPositionsString } from './geometryAttributeParser'
+
 export class Poml {
   scene: Scene
   meta?: Meta
