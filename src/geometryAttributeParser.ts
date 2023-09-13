@@ -1,4 +1,4 @@
-import { GeodeticPositions, GeometryPositions, RelativePositions } from '.'
+import { GeodeticPositions, RelativePositions } from '.'
 import { parseAsNumberArray } from './parserUtility'
 
 export const parseGeometryPositionsString = (
@@ -8,7 +8,7 @@ export const parseGeometryPositionsString = (
 
   switch (key) {
     case 'geodetic':
-      return parseGeoLocationsString(value)
+      return parseGeodeticPositionsString(value)
     case '':
     case 'relative':
       return parseRelativePositionsString(value)
@@ -33,8 +33,8 @@ const parseGeometryPositionsStringKeyValue = (
   return { key, value }
 }
 
-const parseGeoLocationsString = (
-  text: string | undefined
+const parseGeodeticPositionsString = (
+  text: string
 ): GeodeticPositions | undefined => {
   const numbers = parseAsNumberArray(text)
   if (numbers === undefined) {
@@ -57,7 +57,7 @@ const parseGeoLocationsString = (
 }
 
 const parseRelativePositionsString = (
-  text: string | undefined
+  text: string
 ): RelativePositions | undefined => {
   const numbers = parseAsNumberArray(text)
   if (numbers === undefined) {

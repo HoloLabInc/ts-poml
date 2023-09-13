@@ -263,18 +263,8 @@ export abstract class GeometryBase {
 
 export type PomlGeometry = LineGeometry | PolygonGeometry
 
-/*
-export type GeoLocation = {
-  type: 'geo-location'
-  latitude: number
-  longitude: number
-  ellipsoidalHeight: number
-}
-*/
-
 export type GeometryPositions = string | RelativePositions | GeodeticPositions
 
-// export type RelativePosition = Position & { type: 'relative' }
 export type RelativePositions = {
   type: 'relative'
   positions: Position[]
@@ -292,44 +282,18 @@ export type GeodeticPositions = {
 export class LineGeometry extends GeometryBase {
   type: 'line' = 'line'
   vertices?: GeometryPositions
-  /*
-  positions:
-    | readonly [RelativePosition, RelativePosition]
-    | readonly [GeoLocation, GeoLocation]
-    */
   color?: string
-  /*
-  public get positionType(): LineGeometry['positions'][0]['type'] {
-    return this.positions[0].type
-  }
-  */
 
-  constructor(
-    init: Partial<LineGeometry>
-    //init: Partial<LineGeometry> & { positions: LineGeometry['positions'] }
-  ) {
+  constructor(init: Partial<LineGeometry>) {
     super(init)
-    /*
-    this.positions ??= [
-      { type: 'relative', x: 0, y: 0, z: 0 },
-      { type: 'relative', x: 0, y: 0, z: 0 },
-    ]
-    */
   }
 }
 
 export class PolygonGeometry extends GeometryBase {
   type: 'polygon' = 'polygon'
-  // vertices?: RelativePositions | GeodeticPositions
   vertices?: GeometryPositions
   indices?: number[]
   color?: string
-
-  /*
-  public get positionType(): (RelativePositions | GeoLocation)['type'] {
-    return this.vertices?.type ?? 'relative'
-  }
-  */
 
   constructor(init: Partial<PolygonGeometry>) {
     super(init)
