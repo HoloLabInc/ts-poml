@@ -278,21 +278,6 @@ describe('parse', () => {
         throw new Error('failed')
       }
       expect(line1.vertices).toBe('7,8,9 10,11,12')
-      /*
-      expect(line1.positions.length).toBe(2)
-      expect(line1.positions[0]).toStrictEqual({
-        type: 'relative',
-        x: 7,
-        y: 8,
-        z: 9,
-      })
-      expect(line1.positions[1]).toStrictEqual({
-        type: 'relative',
-        x: 10,
-        y: 11,
-        z: 12,
-      })
-      */
       expect(line1.color).toBe(undefined)
     }
 
@@ -312,21 +297,6 @@ describe('parse', () => {
       expect(line.vertices).toBe(
         'geodetic: 34.630549,135.0341387,18.65 34.6021554,135.0094035,18.65'
       )
-      /*
-      expect(line.positions.length).toBe(2)
-      expect(line.positions[0]).toStrictEqual({
-        type: 'geo-location',
-        latitude: 34.630549,
-        longitude: 135.0341387,
-        ellipsoidalHeight: 18.65,
-      })
-      expect(line.positions[1]).toStrictEqual({
-        type: 'geo-location',
-        latitude: 34.6021554,
-        longitude: 135.0094035,
-        ellipsoidalHeight: 18.65,
-      })
-      */
       expect(line.color).toBe('green')
     }
   })
@@ -364,20 +334,6 @@ describe('parse', () => {
       if (polygon0.vertices === undefined) {
         throw new Error('failed')
       }
-      /*
-      expect(polygon0.vertices.positions.length).toBe(2)
-      expect(polygon0.vertices.type).toBe('relative')
-      expect(polygon0.vertices.positions[0]).toStrictEqual({
-        x: 1,
-        y: 2,
-        z: 3,
-      })
-      expect(polygon0.vertices.positions[1]).toStrictEqual({
-        x: 4,
-        y: 5,
-        z: 6,
-      })
-      */
       expect(polygon0.vertices).toBe('1,2,3 4,5,6')
       expect(polygon0.indices).toEqual([0, 1, 2])
       expect(polygon0.color).toBe('red')
@@ -401,20 +357,6 @@ describe('parse', () => {
       }
 
       expect(polygon.vertices).toBe('geodetic: 1,2,3 4,5,6')
-      /*
-      expect(polygon.vertices.positions.length).toBe(2)
-      expect(polygon.vertices.type).toBe('geo-location')
-      expect(polygon.vertices.positions[0]).toStrictEqual({
-        longitude: 1,
-        latitude: 2,
-        ellipsoidalHeight: 3,
-      })
-      expect(polygon.vertices.positions[1]).toStrictEqual({
-        longitude: 4,
-        latitude: 5,
-        ellipsoidalHeight: 6,
-      })
-      */
       expect(polygon.indices).toEqual([0, 2, 1])
       expect(polygon.color).toBe('green')
     }
@@ -1313,7 +1255,7 @@ describe('parse', () => {
             geometries: [
               new LineGeometry({
                 type: 'line',
-                vertices: "1,2,3 4,5,6 -0.5 7.5 10",
+                vertices: '1,2,3 4,5,6 -0.5 7.5 10',
                 color: 'blue',
               }),
             ],
@@ -1332,7 +1274,7 @@ describe('parse', () => {
             geometries: [
               new PolygonGeometry({
                 type: 'polygon',
-                vertices: "1,2,3 4,5,6",
+                vertices: '1,2,3 4,5,6',
                 indices: [0, 1, 2],
                 color: 'blue',
               }),
@@ -1342,7 +1284,7 @@ describe('parse', () => {
             geometries: [
               new PolygonGeometry({
                 type: 'polygon',
-                vertices: "geodetic: 1,2,3 4,5,6",
+                vertices: 'geodetic: 1,2,3 4,5,6',
                 color: 'blue',
               }),
             ],
