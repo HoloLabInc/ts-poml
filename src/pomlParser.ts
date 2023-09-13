@@ -25,6 +25,7 @@ import {
   MaybePomlElement,
   PolygonGeometry,
   GeometryPositions,
+  GeometryIndices,
 } from '.'
 import {
   FxElement,
@@ -48,7 +49,6 @@ import {
   FxScriptElementAttributes,
   FxPolygonGeometry,
 } from './fastXmlParserPomlType'
-import { parseAsNumberArray } from './parserUtility'
 
 const parseAsBoolean = (text: string | undefined) => {
   if (!text) {
@@ -174,17 +174,6 @@ const parseAsQuaternion = (text: string | undefined) => {
   return undefined
 }
 
-const buildNumberArrayString = (
-  numbers: number[] | undefined,
-  separator: string = ' '
-) => {
-  if (numbers === undefined) {
-    return undefined
-  }
-
-  return numbers.join(separator)
-}
-
 const parseAsStringArray = (text: string | undefined): string[] => {
   if (!text) {
     return []
@@ -246,7 +235,7 @@ const buildOriginalAttributes = (
     : {}
 }
 
-const buildGeoLocationsOrRelativeString = (
+const buildGeometryPositionsString = (
   p: GeometryPositions | undefined
 ): string | undefined => {
   if (p === undefined) {
@@ -268,6 +257,20 @@ const buildGeoLocationsOrRelativeString = (
       return p.positions.map((p) => `${p.x},${p.y},${p.z}`).join(' ')
     }
   }
+}
+
+const buildGeometryIndicesString = (
+  indicies: GeometryIndices | undefined
+): string | undefined => {
+  if (indicies === undefined) {
+    return undefined
+  }
+
+  if (typeof indicies === 'string') {
+    return indicies
+  }
+
+  return indicies.join(' ')
 }
 
 const buildArgsString = (args: string[]) => {
@@ -756,7 +759,7 @@ export class PomlParser {
       const attr = geometry[':@'] ?? {}
       const polygon = new PolygonGeometry({
         vertices: attr['@_vertices'],
-        indices: parseAsNumberArray(attr['@_indices']),
+        indices: attr['@_indices'],
         color: attr['@_color'],
       })
 
@@ -1087,7 +1090,7 @@ export class PomlParser {
       case 'line': {
         const attrs: FxLineGeometry[':@'] = {}
 
-        const vertices = buildGeoLocationsOrRelativeString(geometry.vertices)
+        const vertices = buildGeometryPositionsString(geometry.vertices)
         this.setAttribute(attrs, '@_vertices', vertices)
 
         this.setAttribute(attrs, '@_color', geometry.color)
@@ -1099,10 +1102,10 @@ export class PomlParser {
       case 'polygon': {
         const attrs: FxPolygonGeometry[':@'] = {}
 
-        const vertices = buildGeoLocationsOrRelativeString(geometry.vertices)
+        const vertices = buildGeometryPositionsString(geometry.vertices)
         this.setAttribute(attrs, '@_vertices', vertices)
 
-        const indices = buildNumberArrayString(geometry.indices, ' ')
+        const indices = buildGeometryIndicesString(geometry.indices)
         this.setAttribute(attrs, '@_indices', indices)
 
         this.setAttribute(attrs, '@_color', geometry.color)

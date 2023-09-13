@@ -281,6 +281,8 @@ export type GeodeticPositions = {
   }[]
 }
 
+export type GeometryIndices = string | number[]
+
 export class LineGeometry extends GeometryBase {
   type: 'line' = 'line'
   vertices?: GeometryPositions
@@ -294,7 +296,7 @@ export class LineGeometry extends GeometryBase {
 export class PolygonGeometry extends GeometryBase {
   type: 'polygon' = 'polygon'
   vertices?: GeometryPositions
-  indices?: number[]
+  indices?: GeometryIndices
   color?: string
 
   constructor(init: Partial<PolygonGeometry>) {
