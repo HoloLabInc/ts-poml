@@ -335,7 +335,7 @@ describe('parse', () => {
         throw new Error('failed')
       }
       expect(polygon0.vertices).toBe('1,2,3 4,5,6')
-      expect(polygon0.indices).toEqual([0, 1, 2])
+      expect(polygon0.indices).toBe('0 1 2')
       expect(polygon0.color).toBe('red')
     }
 
@@ -357,7 +357,7 @@ describe('parse', () => {
       }
 
       expect(polygon.vertices).toBe('geodetic: 1,2,3 4,5,6')
-      expect(polygon.indices).toEqual([0, 2, 1])
+      expect(polygon.indices).toBe('0,2,1')
       expect(polygon.color).toBe('green')
     }
   })
@@ -1275,7 +1275,7 @@ describe('parse', () => {
               new PolygonGeometry({
                 type: 'polygon',
                 vertices: '1,2,3 4,5,6',
-                indices: [0, 1, 2],
+                indices: '0, 1, 2',
                 color: 'blue',
               }),
             ],
