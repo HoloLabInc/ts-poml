@@ -49,14 +49,11 @@ import {
   FxScriptElementAttributes,
   FxPolygonGeometry,
 } from './fastXmlParserPomlType'
-
-const parseAsBoolean = (text: string | undefined) => {
-  if (!text) {
-    return undefined
-  }
-
-  return text.toLocaleLowerCase() == 'true'
-}
+import {
+  parseAsNumber,
+  parseAsQuaternion,
+  parseAsVector3,
+} from './parserUtility'
 
 const buildBooleanString = (
   value: boolean | undefined,
@@ -104,77 +101,7 @@ const buildBooleanOrNumberString = (
   return value.toString()
 }
 
-const parseAsNumber = (text: string | undefined) => {
-  if (!text) {
-    return undefined
-  }
-
-  const num = Number.parseFloat(text)
-  if (Number.isNaN(num)) {
-    return undefined
-  } else {
-    return num
-  }
-}
-
-const parseAsVector3 = (text: string | undefined) => {
-  if (!text) {
-    return undefined
-  }
-
-  const r = /[,\s]+/g
-  const tokens = text.split(r)
-
-  if (tokens.length == 3) {
-    const x = Number.parseFloat(tokens[0])
-    const y = Number.parseFloat(tokens[1])
-    const z = Number.parseFloat(tokens[2])
-
-    if (!Number.isNaN(x) && !Number.isNaN(y) && !Number.isNaN(z)) {
-      return {
-        x,
-        y,
-        z,
-      }
-    }
-  }
-
-  return undefined
-}
-
-const parseAsQuaternion = (text: string | undefined) => {
-  if (!text) {
-    return undefined
-  }
-
-  const r = /[,\s]+/g
-  const tokens = text.split(r)
-
-  if (tokens.length == 4) {
-    const x = Number.parseFloat(tokens[0])
-    const y = Number.parseFloat(tokens[1])
-    const z = Number.parseFloat(tokens[2])
-    const w = Number.parseFloat(tokens[3])
-
-    if (
-      !Number.isNaN(x) &&
-      !Number.isNaN(y) &&
-      !Number.isNaN(z) &&
-      !Number.isNaN(w)
-    ) {
-      return {
-        x,
-        y,
-        z,
-        w,
-      }
-    }
-  }
-
-  return undefined
-}
-
-const parseAsStringArray = (text: string | undefined): string[] => {
+const parseScriptArgsString = (text: string | undefined): string[] => {
   if (!text) {
     return []
   }
@@ -706,7 +633,7 @@ export class PomlParser {
       const attr = fxElement[':@'] ?? {}
       const src = attr['@_src']
       const filename = attr['@_filename']
-      const args = parseAsStringArray(attr['@_args'])
+      const args = parseScriptArgsString(attr['@_args'])
       return {
         type: 'script',
         id,
