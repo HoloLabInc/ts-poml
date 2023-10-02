@@ -187,10 +187,23 @@ export class PomlModelElement extends PomlElementBase {
   }
 }
 
-export class PomlImageElement extends PomlElementBase {
-  type: 'image' = 'image'
+export class PomlMediaElement extends PomlElementBase {
   src?: string
   filename?: string
+
+  width?: number
+  height?: number
+
+  constructor(
+    init?: Partial<PomlMediaElement>,
+    originalAttrs: Map<string, string> | undefined = undefined
+  ) {
+    super(init ?? {}, originalAttrs)
+  }
+}
+
+export class PomlImageElement extends PomlMediaElement {
+  type: 'image' = 'image'
 
   constructor(
     init?: Partial<PomlImageElement>,
@@ -200,10 +213,8 @@ export class PomlImageElement extends PomlElementBase {
   }
 }
 
-export class PomlVideoElement extends PomlElementBase {
+export class PomlVideoElement extends PomlMediaElement {
   type: 'video' = 'video'
-  src?: string
-  filename?: string
 
   constructor(
     init?: Partial<PomlVideoElement>,

@@ -79,20 +79,21 @@ export interface FxTextElementAttributes extends FxElementAttributesBase {
   '@_background-color'?: string
 }
 
-export interface FxImageElementAttributes extends FxElementAttributesBase {
+export interface FxMediaElementAttributes extends FxElementAttributesBase {
   '@_src'?: string
   '@_filename'?: string
+  '@_width'?: string
+  '@_height'?: string
 }
+
+export interface FxImageElementAttributes extends FxMediaElementAttributes {}
 
 export interface FxImageElement {
   ':@'?: FxImageElementAttributes
   image: FxElement[]
 }
 
-export interface FxVideoElementAttributes extends FxElementAttributesBase {
-  '@_src'?: string
-  '@_filename'?: string
-}
+export interface FxVideoElementAttributes extends FxMediaElementAttributes {}
 
 export interface FxVideoElement {
   ':@'?: FxVideoElementAttributes
