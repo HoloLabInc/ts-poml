@@ -187,12 +187,17 @@ export class PomlModelElement extends PomlElementBase {
   }
 }
 
+export type BackfaceMode = 'none' | 'solid' | 'visible' | 'flipped'
+
 export class PomlMediaElement extends PomlElementBase {
   src?: string
   filename?: string
 
   width?: number
   height?: number
+
+  backfaceMode?: BackfaceMode
+  backfaceColor?: string
 
   constructor(
     init?: Partial<PomlMediaElement>,

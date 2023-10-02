@@ -84,6 +84,8 @@ export interface FxMediaElementAttributes extends FxElementAttributesBase {
   '@_filename'?: string
   '@_width'?: string
   '@_height'?: string
+  '@_backface-mode'?: string
+  '@_backface-color'?: string
 }
 
 export interface FxImageElementAttributes extends FxMediaElementAttributes {}
