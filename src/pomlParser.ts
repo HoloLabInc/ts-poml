@@ -910,6 +910,16 @@ export class PomlParser {
       }
       this.setAttribute(imageAttributes, '@_src', pomlElement.src)
       this.setAttribute(imageAttributes, '@_filename', pomlElement.filename)
+      this.setAttribute(
+        imageAttributes,
+        '@_width',
+        pomlElement.width?.toString()
+      )
+      this.setAttribute(
+        imageAttributes,
+        '@_height',
+        pomlElement.height?.toString()
+      )
       return {
         image: [
           ...this.coordinateReferencesToFxElements(
@@ -929,6 +939,16 @@ export class PomlParser {
       }
       this.setAttribute(videoAttributes, '@_src', pomlElement.src)
       this.setAttribute(videoAttributes, '@_filename', pomlElement.filename)
+      this.setAttribute(
+        videoAttributes,
+        '@_width',
+        pomlElement.width?.toString()
+      )
+      this.setAttribute(
+        videoAttributes,
+        '@_height',
+        pomlElement.height?.toString()
+      )
       return {
         video: [
           ...this.coordinateReferencesToFxElements(

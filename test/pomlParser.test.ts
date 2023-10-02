@@ -201,12 +201,13 @@ describe('parse', () => {
         <image src="image0"></image>
         <image src="image1" width="0.5"></image>
         <image src="image2" height="-2.0"></image>
+        <image src="image3" width="-2.0" height="0.5"></image>
       </scene>
     </poml>
     `
 
     const poml = parse(xml)
-    expect(poml.scene.children?.length).toBe(3)
+    expect(poml.scene.children?.length).toBe(4)
 
     const element0 = poml.scene.children?.[0] as PomlImageElement
     expect(element0.type).toBe('image')
@@ -225,6 +226,12 @@ describe('parse', () => {
     expect(element2.src).toBe('image2')
     expect(element2.width).toBe(undefined)
     expect(element2.height).toBe(-2.0)
+
+    const element3 = poml.scene.children?.[3] as PomlImageElement
+    expect(element3.type).toBe('image')
+    expect(element3.src).toBe('image3')
+    expect(element3.width).toBe(-2.0)
+    expect(element3.height).toBe(0.5)
   })
 
   test('parse video element', () => {
@@ -1142,6 +1149,25 @@ describe('parse', () => {
         children: [
           new PomlImageElement({
             src: 'image1',
+          }),
+          new PomlImageElement({
+            src: 'image2',
+            width: 2.0,
+            height: 0.5,
+          }),
+        ],
+      }),
+    },
+    {
+      scene: Poml.scene({
+        children: [
+          new PomlVideoElement({
+            src: 'video1',
+          }),
+          new PomlVideoElement({
+            src: 'video2',
+            width: 2.0,
+            height: 0.5,
           }),
         ],
       }),
