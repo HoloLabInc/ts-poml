@@ -519,6 +519,8 @@ export class PomlParser {
       const attr = fxElement[':@'] ?? {}
       const src = attr['@_src']
       const filename = attr['@_filename']
+      const width = parseAsNumber(attr['@_width'])
+      const height = parseAsNumber(attr['@_height'])
 
       const childElements = this.parseChildren(fxElement.image)
 
@@ -528,6 +530,8 @@ export class PomlParser {
           ...childElements,
           src,
           filename,
+          width,
+          height,
         },
         originalAttrs
       )
@@ -538,6 +542,8 @@ export class PomlParser {
       const attr = fxElement[':@'] ?? {}
       const src = attr['@_src']
       const filename = attr['@_filename']
+      const width = parseAsNumber(attr['@_width'])
+      const height = parseAsNumber(attr['@_height'])
       const childElements = this.parseChildren(fxElement.video)
 
       return new PomlVideoElement(
@@ -546,6 +552,8 @@ export class PomlParser {
           ...childElements,
           src,
           filename,
+          width,
+          height,
         },
         originalAttrs
       )
