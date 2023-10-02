@@ -238,21 +238,40 @@ describe('parse', () => {
     const xml = `
     <poml>
       <scene>
-        <video src="video1"></video>
+        <video src="video0"></video>
+        <video src="video1" width="0.5"></video>
+        <video src="video2" height="-2.0"></video>
+        <video src="video3" width="-2.0" height="0.5"></video>
       </scene>
     </poml>
     `
 
     const poml = parse(xml)
-    expect(poml.scene.children?.length).toBe(1)
+    expect(poml.scene.children?.length).toBe(4)
 
-    const element = poml.scene.children?.[0]
-    expect(element?.type).toBe('video')
-    if (element?.type != 'video') {
-      throw new Error('failed')
-    }
+    const element0 = poml.scene.children?.[0] as PomlVideoElement
+    expect(element0.type).toBe('video')
+    expect(element0.src).toBe('video0')
+    expect(element0.width).toBe(undefined)
+    expect(element0.height).toBe(undefined)
 
-    expect(element.src).toBe('video1')
+    const element1 = poml.scene.children?.[1] as PomlVideoElement
+    expect(element1.type).toBe('video')
+    expect(element1.src).toBe('video1')
+    expect(element1.width).toBe(0.5)
+    expect(element1.height).toBe(undefined)
+
+    const element2 = poml.scene.children?.[2] as PomlVideoElement
+    expect(element2.type).toBe('video')
+    expect(element2.src).toBe('video2')
+    expect(element2.width).toBe(undefined)
+    expect(element2.height).toBe(-2.0)
+
+    const element3 = poml.scene.children?.[3] as PomlVideoElement
+    expect(element3.type).toBe('video')
+    expect(element3.src).toBe('video3')
+    expect(element3.width).toBe(-2.0)
+    expect(element3.height).toBe(0.5)
   })
 
   test('parse geometry line element', () => {
