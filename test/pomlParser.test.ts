@@ -199,39 +199,50 @@ describe('parse', () => {
     <poml>
       <scene>
         <image src="image0"></image>
-        <image src="image1" width="0.5"></image>
-        <image src="image2" height="-2.0"></image>
-        <image src="image3" width="-2.0" height="0.5"></image>
+        <image src="image1" width="0.5" backface-mode="none"></image>
+        <image src="image2" height="-2.0" backface-mode="solid" backface-color="yellow"></image>
+        <image src="image3" width="-2.0" height="0.5" backface-mode="visible"></image>
+        <image src="image4" backface-mode="flipped"></image>
       </scene>
     </poml>
     `
 
     const poml = parse(xml)
-    expect(poml.scene.children?.length).toBe(4)
+    expect(poml.scene.children?.length).toBe(5)
 
     const element0 = poml.scene.children?.[0] as PomlImageElement
     expect(element0.type).toBe('image')
     expect(element0.src).toBe('image0')
     expect(element0.width).toBe(undefined)
     expect(element0.height).toBe(undefined)
+    expect(element0.backfaceMode).toBe(undefined)
 
     const element1 = poml.scene.children?.[1] as PomlImageElement
     expect(element1.type).toBe('image')
     expect(element1.src).toBe('image1')
     expect(element1.width).toBe(0.5)
     expect(element1.height).toBe(undefined)
+    expect(element1.backfaceMode).toBe('none')
 
     const element2 = poml.scene.children?.[2] as PomlImageElement
     expect(element2.type).toBe('image')
     expect(element2.src).toBe('image2')
     expect(element2.width).toBe(undefined)
     expect(element2.height).toBe(-2.0)
+    expect(element2.backfaceMode).toBe('solid')
+    expect(element2.backfaceColor).toBe('yellow')
 
     const element3 = poml.scene.children?.[3] as PomlImageElement
     expect(element3.type).toBe('image')
     expect(element3.src).toBe('image3')
     expect(element3.width).toBe(-2.0)
     expect(element3.height).toBe(0.5)
+    expect(element3.backfaceMode).toBe('visible')
+
+    const element4 = poml.scene.children?.[4] as PomlImageElement
+    expect(element4.type).toBe('image')
+    expect(element4.src).toBe('image4')
+    expect(element4.backfaceMode).toBe('flipped')
   })
 
   test('parse video element', () => {
@@ -239,39 +250,50 @@ describe('parse', () => {
     <poml>
       <scene>
         <video src="video0"></video>
-        <video src="video1" width="0.5"></video>
-        <video src="video2" height="-2.0"></video>
-        <video src="video3" width="-2.0" height="0.5"></video>
+        <video src="video1" width="0.5" backface-mode="none"></video>
+        <video src="video2" height="-2.0" backface-mode="solid" backface-color="yellow"></video>
+        <video src="video3" width="-2.0" height="0.5" backface-mode="visible"></video>
+        <video src="video4" backface-mode="flipped"></video>
       </scene>
     </poml>
     `
 
     const poml = parse(xml)
-    expect(poml.scene.children?.length).toBe(4)
+    expect(poml.scene.children?.length).toBe(5)
 
     const element0 = poml.scene.children?.[0] as PomlVideoElement
     expect(element0.type).toBe('video')
     expect(element0.src).toBe('video0')
     expect(element0.width).toBe(undefined)
     expect(element0.height).toBe(undefined)
+    expect(element0.backfaceMode).toBe(undefined)
 
     const element1 = poml.scene.children?.[1] as PomlVideoElement
     expect(element1.type).toBe('video')
     expect(element1.src).toBe('video1')
     expect(element1.width).toBe(0.5)
     expect(element1.height).toBe(undefined)
+    expect(element1.backfaceMode).toBe('none')
 
     const element2 = poml.scene.children?.[2] as PomlVideoElement
     expect(element2.type).toBe('video')
     expect(element2.src).toBe('video2')
     expect(element2.width).toBe(undefined)
     expect(element2.height).toBe(-2.0)
+    expect(element2.backfaceMode).toBe('solid')
+    expect(element2.backfaceColor).toBe('yellow')
 
     const element3 = poml.scene.children?.[3] as PomlVideoElement
     expect(element3.type).toBe('video')
     expect(element3.src).toBe('video3')
     expect(element3.width).toBe(-2.0)
     expect(element3.height).toBe(0.5)
+    expect(element3.backfaceMode).toBe('visible')
+
+    const element4 = poml.scene.children?.[4] as PomlVideoElement
+    expect(element4.type).toBe('video')
+    expect(element4.src).toBe('video4')
+    expect(element4.backfaceMode).toBe('flipped')
   })
 
   test('parse geometry line element', () => {
@@ -1173,6 +1195,20 @@ describe('parse', () => {
             src: 'image2',
             width: 2.0,
             height: 0.5,
+            backfaceMode: 'none',
+          }),
+          new PomlImageElement({
+            src: 'image3',
+            backfaceMode: 'solid',
+            backfaceColor: '#123456',
+          }),
+          new PomlImageElement({
+            src: 'image4',
+            backfaceMode: 'visible',
+          }),
+          new PomlImageElement({
+            src: 'image5',
+            backfaceMode: 'flipped',
           }),
         ],
       }),
@@ -1187,6 +1223,20 @@ describe('parse', () => {
             src: 'video2',
             width: 2.0,
             height: 0.5,
+            backfaceMode: 'none',
+          }),
+          new PomlVideoElement({
+            src: 'video3',
+            backfaceMode: 'solid',
+            backfaceColor: '#123456',
+          }),
+          new PomlVideoElement({
+            src: 'video4',
+            backfaceMode: 'visible',
+          }),
+          new PomlVideoElement({
+            src: 'video5',
+            backfaceMode: 'flipped',
           }),
         ],
       }),

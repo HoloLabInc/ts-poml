@@ -26,6 +26,7 @@ import {
   PolygonGeometry,
   GeometryPositions,
   GeometryIndices,
+  BackfaceMode,
 } from '.'
 import {
   FxElement,
@@ -139,6 +140,53 @@ const buildRotationString = (rotation: Rotation | undefined) => {
     return undefined
   }
   return `${rotation.x} ${rotation.y} ${rotation.z} ${rotation.w}`
+}
+
+const parseDisplayString = (text: string | undefined): Display | undefined => {
+  switch (text?.trim()?.toLowerCase()) {
+    case 'none':
+      return 'none'
+    case 'occlusion':
+      return 'occlusion'
+    case 'visible':
+      return 'visible'
+    default:
+      return undefined
+  }
+}
+
+const parseArDisplayString = (
+  text: string | undefined
+): ArDisplay | undefined => {
+  switch (text?.trim()?.toLowerCase()) {
+    case 'none':
+      return 'none'
+    case 'occlusion':
+      return 'occlusion'
+    case 'visible':
+      return 'visible'
+    case 'same-as-display':
+      return 'same-as-display'
+    default:
+      return undefined
+  }
+}
+
+const parseBackfaceModeString = (
+  text: string | undefined
+): BackfaceMode | undefined => {
+  switch (text?.trim()?.toLowerCase()) {
+    case 'none':
+      return 'none'
+    case 'solid':
+      return 'solid'
+    case 'visible':
+      return 'visible'
+    case 'flipped':
+      return 'flipped'
+    default:
+      return undefined
+  }
 }
 
 const parseCustomAttributes = (attributeObjet: object): Map<string, string> => {
@@ -418,32 +466,9 @@ export class PomlParser {
     )
     const minScale = parseScaleString(attributes['@_min-scale'])
     const maxScale = parseScaleString(attributes['@_max-scale'])
-    const display: Display | undefined = (() => {
-      switch (attributes['@_display']) {
-        case 'none':
-          return 'none'
-        case 'occlusion':
-          return 'occlusion'
-        case 'visible':
-          return 'visible'
-        default:
-          return undefined
-      }
-    })()
-    const arDisplay: ArDisplay | undefined = (() => {
-      switch (attributes['@_ar-display']) {
-        case 'none':
-          return 'none'
-        case 'occlusion':
-          return 'occlusion'
-        case 'visible':
-          return 'visible'
-        case 'same-as-display':
-          return 'same-as-display'
-        default:
-          return undefined
-      }
-    })()
+    const display = parseDisplayString(attributes['@_display'])
+    const arDisplay = parseArDisplayString(attributes['@_ar-display'])
+
     const id = attributes['@_id']
     const webLink = attributes['@_web-link']
     const wsRecvUrl = attributes['@_ws-recv-url']
@@ -521,7 +546,8 @@ export class PomlParser {
       const filename = attr['@_filename']
       const width = parseAsNumber(attr['@_width'])
       const height = parseAsNumber(attr['@_height'])
-
+      const backfaceMode = parseBackfaceModeString(attr['@_backface-mode'])
+      const backfaceColor = attr['@_backface-color']
       const childElements = this.parseChildren(fxElement.image)
 
       return new PomlImageElement(
@@ -532,6 +558,8 @@ export class PomlParser {
           filename,
           width,
           height,
+          backfaceMode,
+          backfaceColor,
         },
         originalAttrs
       )
@@ -544,6 +572,8 @@ export class PomlParser {
       const filename = attr['@_filename']
       const width = parseAsNumber(attr['@_width'])
       const height = parseAsNumber(attr['@_height'])
+      const backfaceMode = parseBackfaceModeString(attr['@_backface-mode'])
+      const backfaceColor = attr['@_backface-color']
       const childElements = this.parseChildren(fxElement.video)
 
       return new PomlVideoElement(
@@ -554,6 +584,8 @@ export class PomlParser {
           filename,
           width,
           height,
+          backfaceMode,
+          backfaceColor,
         },
         originalAttrs
       )
@@ -920,6 +952,16 @@ export class PomlParser {
         '@_height',
         pomlElement.height?.toString()
       )
+      this.setAttribute(
+        imageAttributes,
+        '@_backface-mode',
+        pomlElement.backfaceMode
+      )
+      this.setAttribute(
+        imageAttributes,
+        '@_backface-color',
+        pomlElement.backfaceColor
+      )
       return {
         image: [
           ...this.coordinateReferencesToFxElements(
@@ -948,6 +990,16 @@ export class PomlParser {
         videoAttributes,
         '@_height',
         pomlElement.height?.toString()
+      )
+      this.setAttribute(
+        videoAttributes,
+        '@_backface-mode',
+        pomlElement.backfaceMode
+      )
+      this.setAttribute(
+        videoAttributes,
+        '@_backface-color',
+        pomlElement.backfaceColor
       )
       return {
         video: [
