@@ -41,7 +41,7 @@ export interface FxEmptyElement {
 }
 
 export interface FxElementAttributesBase {
-  '@_rotation-mode'?: 'vertical-billboard' | 'billboard'
+  '@_rotation-mode'?: 'vertical-billboard' | 'billboard' | 'plane-billboard'
   '@_scale'?: string
   '@_position'?: string
   '@_rotation'?: string
