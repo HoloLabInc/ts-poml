@@ -30,7 +30,10 @@ export class Meta {
   }
 }
 
-export type RotationMode = 'vertical-billboard' | 'billboard'
+export type RotationMode =
+  | 'vertical-billboard'
+  | 'billboard'
+  | 'plane-billboard'
 export type Display = 'visible' | 'none' | 'occlusion'
 export type ArDisplay = 'visible' | 'none' | 'occlusion' | 'same-as-display'
 export type Position = { x: number; y: number; z: number }
